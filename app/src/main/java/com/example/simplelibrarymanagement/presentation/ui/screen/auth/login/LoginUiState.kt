@@ -1,19 +1,17 @@
 package com.example.simplelibrarymanagement.presentation.ui.screen.auth.login
 
 data class LoginUiState(
-    val email: String = "",
+    val username: String = "",
     val password: String = "",
-    val isLoading: Boolean = false,
-    val isPasswordVisible: Boolean = false,
-    val emailError: String? = null,
+    val usernameError: String? = null,
     val passwordError: String? = null,
-    val generalError: String? = null,
-    val isLoginSuccessful: Boolean = false,
-    val rememberMe: Boolean = false
+    val isLoading: Boolean = false,
+    val isLoginSuccess: Boolean = false,
+    val errorMessage: String? = null
 ) {
     val isFormValid: Boolean
-        get() = email.isNotBlank() &&
+        get() = username.isNotBlank() &&
                 password.isNotBlank() &&
-                emailError == null &&
+                usernameError == null &&
                 passwordError == null
 }

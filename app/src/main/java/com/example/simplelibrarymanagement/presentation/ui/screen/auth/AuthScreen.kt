@@ -25,92 +25,66 @@ fun AuthScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .padding(24.dp),
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top navigation tabs
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 40.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Login / Sign up",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary,
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = "Login",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f)
-            )
-
-            Text(
-                text = "Sign Up",
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextSecondary,
-                textAlign = TextAlign.End,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(120.dp))
 
         // App Logo and Title
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 80.dp)
+            modifier = Modifier.padding(bottom = 100.dp)
         ) {
             // App Title
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Text(
                     text = "Boogu",
-                    style = MaterialTheme.libraryTypography.AppTitle,
+                    style = MaterialTheme.libraryTypography.AppTitle.copy(
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                     color = TextPrimary
                 )
 
                 // Orange dot
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
+                        .size(12.dp)
                         .background(
                             color = Primary,
                             shape = RoundedCornerShape(50.dp)
                         )
-                        .padding(start = 4.dp)
+                        .offset(x = 4.dp, y = 8.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // App Subtitle
             Text(
                 text = "Your book\nlibrary",
-                style = MaterialTheme.libraryTypography.AppSubtitle,
+                style = MaterialTheme.libraryTypography.AppSubtitle.copy(
+                    fontSize = 18.sp
+                ),
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
-                lineHeight = 20.sp
+                lineHeight = 24.sp
             )
         }
 
         // Authentication Buttons
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Log in Button
             Button(
                 onClick = onNavigateToLogin,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(52.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Primary,
                     contentColor = OnPrimary
@@ -119,8 +93,10 @@ fun AuthScreen(
             ) {
                 Text(
                     text = "Log in",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
 
@@ -129,20 +105,22 @@ fun AuthScreen(
                 onClick = onNavigateToRegister,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(52.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = Primary,
                     containerColor = Color.Transparent
                 ),
                 border = ButtonDefaults.outlinedButtonBorder.copy(
-                    width = 1.dp
+                    width = 1.5.dp
                 ),
                 shape = MaterialTheme.libraryShapes.ButtonMedium
             ) {
                 Text(
                     text = "Sign up",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
         }
@@ -152,11 +130,11 @@ fun AuthScreen(
         // Bottom indicator line
         Box(
             modifier = Modifier
-                .width(134.dp)
-                .height(4.dp)
+                .width(140.dp)
+                .height(5.dp)
                 .background(
                     color = Color.Black,
-                    shape = RoundedCornerShape(2.dp)
+                    shape = RoundedCornerShape(2.5.dp)
                 )
         )
     }

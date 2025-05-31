@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items // Import this for items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,7 +36,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.simplelibrarymanagement.presentation.ui.theme.LibraryTheme
+// Ubah import ini ke nama tema yang benar
+import com.example.simplelibrarymanagement.presentation.ui.theme.SimpleLibraryManagementTheme
 
 @Composable
 fun LoadingScreen(
@@ -176,6 +178,7 @@ fun BookListSkeleton(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
     ) {
+        // Menggunakan items() dengan Int parameter
         items(itemCount) {
             BookItemSkeleton()
         }
@@ -219,7 +222,8 @@ fun EmptyState(
 @Preview(showBackground = true)
 @Composable
 fun LoadingComponentsPreview() {
-    LibraryTheme {
+    // Gunakan nama tema yang benar: SimpleLibraryManagementTheme
+    SimpleLibraryManagementTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -260,14 +264,33 @@ fun LoadingComponentsPreview() {
                     title = "No Books Found",
                     description = "There are no books in your library yet. Add some books to get started.",
                     actionButton = {
+                        // Hapus parameter fullWidth jika CustomButton tidak memilikinya
+                        // Jika CustomButton ada di file lain, pastikan definisi parameternya benar
+                        // Jika kamu belum punya CustomButton, kamu perlu membuatnya atau menggantinya
                         CustomButton(
                             text = "Add Book",
-                            onClick = { },
-                            fullWidth = false
+                            onClick = { /* TODO: Handle click */ }
                         )
                     }
                 )
             }
         }
+    }
+}
+
+// TODO: Pastikan CustomButton composable didefinisikan di suatu tempat
+// Contoh definisi CustomButton sederhana jika belum ada:
+@Composable
+fun CustomButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier // Hapus parameter fullWidth dari sini
+) {
+    // Ini adalah contoh implementasi dasar, sesuaikan dengan desainmu
+    androidx.compose.material3.Button(
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Text(text = text)
     }
 }
