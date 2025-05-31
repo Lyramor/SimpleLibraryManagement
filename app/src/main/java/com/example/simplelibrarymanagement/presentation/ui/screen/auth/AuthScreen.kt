@@ -28,12 +28,15 @@ fun AuthScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(120.dp))
+        // Spacer ini akan mendorong bagian Logo & Judul ke bawah.
+        // Rasio weight 0.8f (di atas logo) dan 1.0f (di bawah logo)
+        // akan membuat logo sedikit lebih tinggi dari tengah-tengah ruang yang tersedia untuknya.
+        Spacer(modifier = Modifier.weight(0.8f))
 
         // App Logo and Title
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 100.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
+            // modifier = Modifier.padding(bottom = 80.dp) // Dihapus, diatur oleh Spacer.weight
         ) {
             // App Title
             Row(
@@ -64,15 +67,18 @@ fun AuthScreen(
 
             // App Subtitle
             Text(
-                text = "Your book\nlibrary",
+                text = "Your book library",
                 style = MaterialTheme.libraryTypography.AppSubtitle.copy(
-                    fontSize = 18.sp
+                    fontSize = 22.sp
                 ),
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
-                lineHeight = 24.sp
+                lineHeight = 32.sp
             )
         }
+
+        // Spacer ini akan mendorong tombol-tombol ke bagian bawah.
+        Spacer(modifier = Modifier.weight(1.0f))
 
         // Authentication Buttons
         Column(
@@ -125,7 +131,7 @@ fun AuthScreen(
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp)) // Jarak antara tombol dan garis bawah
 
         // Bottom indicator line
         Box(
@@ -137,6 +143,7 @@ fun AuthScreen(
                     shape = RoundedCornerShape(2.5.dp)
                 )
         )
+        Spacer(modifier = Modifier.height(32.dp)) // Margin di bagian paling bawah layar
     }
 }
 
