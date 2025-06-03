@@ -1,11 +1,8 @@
 package com.example.simplelibrarymanagement.presentation.ui.screen.auth.register
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,15 +18,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.simplelibrarymanagement.presentation.ui.component.CustomButton // Pastikan ini ada
-import com.example.simplelibrarymanagement.presentation.ui.component.CustomTextField // Pastikan ini ada
-import com.example.simplelibrarymanagement.presentation.ui.component.PasswordTextField // Pastikan ini ada
+import com.example.simplelibrarymanagement.presentation.ui.component.CustomButton
+import com.example.simplelibrarymanagement.presentation.ui.component.CustomTextField
+import com.example.simplelibrarymanagement.presentation.ui.component.PasswordTextField
+import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +35,8 @@ fun RegisterScreen(
     onNavigateBack: () -> Unit = {},
     onRegistrationSuccess: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
-    viewModel: RegisterViewModel = hiltViewModel()
+    viewModel: RegisterViewModel = hiltViewModel(),
+    onRegisterSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,7 +83,7 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White) //
+                .background(Color.White)
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
@@ -145,7 +143,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            PasswordTextField( // Menggunakan PasswordTextField yang seharusnya sudah ada
+            PasswordTextField(
                 value = uiState.password,
                 onValueChange = viewModel::updatePassword,
                 label = "Password",
@@ -158,7 +156,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            PasswordTextField( // Menggunakan PasswordTextField
+            PasswordTextField(
                 value = uiState.confirmPassword,
                 onValueChange = viewModel::updateConfirmPassword,
                 label = "Confirm Password",
@@ -177,7 +175,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            CustomButton( // Menggunakan CustomButton yang seharusnya sudah ada
+            CustomButton(
                 text = "Sign Up",
                 onClick = {
                     focusManager.clearFocus()
@@ -213,10 +211,48 @@ fun RegisterScreen(
     }
 }
 
+// SOLUSI 1: Preview tanpa navigasi (direkomendasikan untuk preview)
 @Preview(showBackground = true)
 @Composable
 fun RegisterScreenPreview() {
     SimpleLibraryManagementTheme {
-        RegisterScreen()
+        RegisterScreen(
+            onNavigateBack = { /* Preview - tidak melakukan apa-apa */ },
+            onRegistrationSuccess = { /* Preview - tidak melakukan apa-apa */ },
+            onNavigateToLogin = { /* Preview - tidak melakukan apa-apa */ },
+            onRegisterSuccess = { /* Preview - tidak melakukan apa-apa */ }
+        )
+    }
+}
+
+// SOLUSI 2: Preview dengan mock ViewModel (untuk testing state)
+@Preview(showBackground = true, name = "Register Screen - Loading State")
+@Composable
+fun RegisterScreenLoadingPreview() {
+    SimpleLibraryManagementTheme {
+        // Untuk preview loading state, Anda bisa membuat mock state
+        // Tapi ini memerlukan mock ViewModel yang kompleks
+        RegisterScreen(
+            onNavigateBack = { },
+            onRegistrationSuccess = { },
+            onNavigateToLogin = { },
+            onRegisterSuccess = { }
+        )
+    }
+}
+
+// SOLUSI 3: Preview untuk berbagai state (memerlukan MockViewModel)
+@Preview(showBackground = true, name = "Register Screen - Error State")
+@Composable
+fun RegisterScreenErrorPreview() {
+    SimpleLibraryManagementTheme {
+        // Untuk menampilkan error state di preview,
+        // Anda perlu membuat MockViewModel atau parameter state langsung
+        RegisterScreen(
+            onNavigateBack = { },
+            onRegistrationSuccess = { },
+            onNavigateToLogin = { },
+            onRegisterSuccess = { }
+        )
     }
 }

@@ -15,24 +15,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.AuthScreen
+import com.example.simplelibrarymanagement.presentation.ui.screen.auth.forgotpassword.ForgotPasswordScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.login.LoginScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.register.RegisterScreen
 import com.example.simplelibrarymanagement.presentation.ui.theme.SimpleLibraryManagementTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint // Penting untuk Hilt
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen
-        installSplashScreen() //
+        installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
         // Enable edge-to-edge display
-        enableEdgeToEdge() //
+        enableEdgeToEdge()
 
         setContent {
-            SimpleLibraryManagementTheme { //
+            SimpleLibraryManagementTheme {
                 LibraryApp()
             }
         }
@@ -42,8 +43,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun LibraryApp() {
     Surface(
-        modifier = Modifier.fillMaxSize(), //
-        color = MaterialTheme.colorScheme.background //
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         // Set up NavController
         val navController = rememberNavController()
@@ -51,8 +52,9 @@ fun LibraryApp() {
         // NavHost defines the navigation graph
         NavHost(
             navController = navController,
-            startDestination = Screen.Auth.route // AuthScreen adalah titik awal
+            startDestination = Screen.Auth.route
         ) {
+            // Auth Screen
             composable(Screen.Auth.route) {
                 AuthScreen(
                     onNavigateToLogin = {
@@ -63,6 +65,8 @@ fun LibraryApp() {
                     }
                 )
             }
+
+            // Login Screen
             composable(Screen.Login.route) {
                 LoginScreen(
                     onNavigateBack = {
@@ -70,18 +74,19 @@ fun LibraryApp() {
                     },
                     onLoginSuccess = {
                         // Arahkan ke layar beranda atau konten aplikasi utama setelah login
-                        // Untuk saat ini, kita kembali ke Auth sebagai placeholder
-                        // Anda akan menggantinya dengan navigasi aktual ke layar utama aplikasi Anda
                         navController.popBackStack(Screen.Auth.route, inclusive = false)
                         // Contoh: navController.navigate(Screen.Home.route) { popUpTo(Screen.Auth.route) { inclusive = true } }
                     },
                     onNavigateToRegister = {
-                        navController.navigate(Screen.Register.route) {
-                            // Opsional: popUpTo(Screen.Login.route) { inclusive = true } untuk menghapus login dari backstack
-                        }
+                        navController.navigate(Screen.Register.route)
+                    },
+                    onNavigateToForgotPassword = {
+                        navController.navigate(Screen.ForgotPassword.route)
                     }
                 )
             }
+
+            // Register Screen
             composable(Screen.Register.route) {
                 RegisterScreen(
                     onNavigateBack = {
@@ -90,16 +95,37 @@ fun LibraryApp() {
                     onRegistrationSuccess = {
                         // Arahkan ke layar login setelah registrasi berhasil
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Auth.route) // Bersihkan back stack hingga AuthScreen
+                            popUpTo(Screen.Auth.route)
                         }
                     },
                     onNavigateToLogin = {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Auth.route) // Bersihkan back stack hingga AuthScreen
+                            popUpTo(Screen.Auth.route)
+                        }
+                    },
+                    onRegisterSuccess = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Auth.route)
                         }
                     }
                 )
             }
+
+            // Forgot Password Screen - TAMBAHKAN INI
+            composable(Screen.ForgotPassword.route) {
+                ForgotPasswordScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onResetSuccess = {
+                        // Navigate back to login screen after successful reset
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.ForgotPassword.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
             // Tambahkan rute composable lainnya di sini
             // composable(Screen.Home.route) { /* HomeScreen(...) */ }
         }
