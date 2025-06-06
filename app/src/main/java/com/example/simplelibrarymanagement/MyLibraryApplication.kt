@@ -2,7 +2,7 @@ package com.example.simplelibrarymanagement
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-@HiltAndroidApp // Anotasi ini WAJIB ada untuk Hilt
+@HiltAndroidApp
 class MyLibraryApplication : Application() {
 
     override fun onCreate() {

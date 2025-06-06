@@ -31,6 +31,7 @@ fun LoginScreen(
     onNavigateBack: () -> Unit = {},
     onLoginSuccess: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -67,8 +68,8 @@ fun LoginScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White, // Atau MaterialTheme.colorScheme.surface
-                    titleContentColor = TextPrimary // Atau MaterialTheme.colorScheme.onSurface
+                    containerColor = Color.White,
+                    titleContentColor = TextPrimary
                 )
             )
         }
@@ -76,21 +77,21 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White) // Atau MaterialTheme.colorScheme.background
-                .padding(paddingValues) // Terapkan padding dari Scaffold
+                .background(Color.White)
+                .padding(paddingValues)
                 .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()), // Tambahkan scroll jika konten panjang
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp)) // Mengurangi spacer atas
+            Spacer(modifier = Modifier.height(40.dp))
 
             // App Logo and Title
             Row(
                 verticalAlignment = Alignment.Top,
-                modifier = Modifier.padding(bottom = 40.dp) // Mengurangi padding bawah
+                modifier = Modifier.padding(bottom = 40.dp)
             ) {
                 Text(
-                    text = "Boogu",
+                    text = "Boongu",
                     style = MaterialTheme.libraryTypography.AppTitle.copy(
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold
@@ -111,7 +112,7 @@ fun LoginScreen(
             // Login Form
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp) // Mengurangi jarak antar field
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Username Field
                 Column(
@@ -199,7 +200,7 @@ fun LoginScreen(
                     }
                 }
 
-                // Forgot Password
+                // Forgot Password - Updated dengan navigasi
                 Text(
                     text = "Forgot your password?",
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -208,37 +209,37 @@ fun LoginScreen(
                     color = TextSecondary,
                     modifier = Modifier
                         .align(Alignment.End)
-                        .clickable { /* Handle forgot password */ }
+                        .clickable { onNavigateToForgotPassword() }
                         .padding(top = 4.dp, bottom = 8.dp)
                 )
 
                 // Login Button
                 Button(
-                    onClick = { //
-                        viewModel.login() //
+                    onClick = {
+                        viewModel.login()
                     },
                     modifier = Modifier
-                        .fillMaxWidth() //
-                        .height(52.dp), //
-                    colors = ButtonDefaults.buttonColors( //
-                        containerColor = Primary, //
-                        contentColor = OnPrimary //
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Primary,
+                        contentColor = OnPrimary
                     ),
-                    shape = MaterialTheme.libraryShapes.ButtonMedium, //
-                    enabled = !uiState.isLoading //
+                    shape = MaterialTheme.libraryShapes.ButtonMedium,
+                    enabled = !uiState.isLoading
                 ) {
-                    if (uiState.isLoading) { //
-                        CircularProgressIndicator( //
-                            color = OnPrimary, //
-                            modifier = Modifier.size(20.dp), //
-                            strokeWidth = 2.dp //
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            color = OnPrimary,
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp
                         )
                     } else {
                         Text(
-                            text = "Log in", //
-                            style = MaterialTheme.typography.labelLarge.copy( //
-                                fontSize = 16.sp, //
-                                fontWeight = FontWeight.SemiBold //
+                            text = "Log in",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         )
                     }
@@ -248,7 +249,7 @@ fun LoginScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp), // Mengurangi padding atas
+                        .padding(top = 16.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -265,7 +266,7 @@ fun LoginScreen(
                         )
                     }
                 }
-            } // Akhir dari Column Login Form
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -278,11 +279,10 @@ fun LoginScreen(
                         color = Color.Black,
                         shape = androidx.compose.foundation.shape.RoundedCornerShape(2.5.dp)
                     )
-                // Menghapus .padding(bottom = 16.dp) dari Box ini
             )
-            Spacer(modifier = Modifier.height(24.dp)) // Menambahkan Spacer di akhir untuk margin bawah
-        } // Akhir dari Column utama
-    } // Akhir dari Scaffold
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
 }
 
 @Preview(showBackground = true)
