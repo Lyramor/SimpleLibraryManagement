@@ -1,7 +1,6 @@
-package com.example.simplelibrarymanagement.presentation.ui.screen.auth.login
+package com.example.simplelibrarymanagement.presentation.ui.screen.auth.forgotpassword
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,33 +15,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.simplelibrarymanagement.presentation.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
+fun ForgotPasswordScreen(
     onNavigateBack: () -> Unit = {},
-    onLoginSuccess: () -> Unit = {},
-    onNavigateToRegister: () -> Unit = {},
-    onNavigateToForgotPassword: () -> Unit = {},
-    viewModel: LoginViewModel = hiltViewModel()
+    onResetSuccess: () -> Unit = {},
+    viewModel: ForgotPasswordViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
     // Handle UI State Changes for navigation
-    LaunchedEffect(uiState.isLoginSuccess) {
-        if (uiState.isLoginSuccess) {
-            onLoginSuccess()
-            viewModel.resetLoginSuccess() // Reset state after navigation
+    LaunchedEffect(uiState.isResetSuccess) {
+        if (uiState.isResetSuccess) {
+            // Show success message first, then navigate after a delay
+            delay(2000)
+            onResetSuccess()
+            viewModel.resetState()
         }
     }
 
@@ -53,7 +54,18 @@ fun LoginScreen(
                 message = it,
                 duration = SnackbarDuration.Long
             )
-            viewModel.clearError() // Clear error after showing
+            viewModel.clearError()
+        }
+    }
+
+    // Show success message if any
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let {
+            snackbarHostState.showSnackbar(
+                message = it,
+                duration = SnackbarDuration.Long
+            )
+            viewModel.clearSuccess()
         }
     }
 
@@ -61,7 +73,7 @@ fun LoginScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Log In") },
+                title = { Text("Forgot Password") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -109,17 +121,29 @@ fun LoginScreen(
                 )
             }
 
-            // Login Form
+            // Description Text
+            Text(
+                text = "Don't worry! Enter your email address and we'll send you a link to reset your password.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp
+                ),
+                color = TextSecondary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            // Reset Password Form
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Username Field
+                // Email Field
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Username",
+                        text = "Email Address",
                         style = MaterialTheme.libraryTypography.FormLabel.copy(
                             fontSize = 16.sp
                         ),
@@ -127,8 +151,8 @@ fun LoginScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     OutlinedTextField(
-                        value = uiState.username,
-                        onValueChange = viewModel::updateUsername,
+                        value = uiState.email,
+                        onValueChange = viewModel::updateEmail,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -144,11 +168,19 @@ fun LoginScreen(
                         ),
                         shape = MaterialTheme.libraryShapes.InputField,
                         singleLine = true,
-                        isError = uiState.usernameError != null
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        isError = uiState.emailError != null,
+                        placeholder = {
+                            Text(
+                                text = "Enter your email address",
+                                color = TextTertiary,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     )
-                    if (uiState.usernameError != null) {
+                    if (uiState.emailError != null) {
                         Text(
-                            text = uiState.usernameError!!,
+                            text = uiState.emailError!!,
                             style = MaterialTheme.libraryTypography.ErrorText,
                             color = Error,
                             modifier = Modifier.padding(top = 4.dp)
@@ -156,67 +188,11 @@ fun LoginScreen(
                     }
                 }
 
-                // Password Field
-                Column(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Password",
-                        style = MaterialTheme.libraryTypography.FormLabel.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = uiState.password,
-                        onValueChange = viewModel::updatePassword,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = InputBorder,
-                            focusedBorderColor = Primary,
-                            unfocusedContainerColor = Color.White,
-                            focusedContainerColor = Color.White,
-                            cursorColor = Primary,
-                            errorBorderColor = Error,
-                            errorLabelColor = Error,
-                            errorCursorColor = Error
-                        ),
-                        shape = MaterialTheme.libraryShapes.InputField,
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        isError = uiState.passwordError != null
-                    )
-                    if (uiState.passwordError != null) {
-                        Text(
-                            text = uiState.passwordError!!,
-                            style = MaterialTheme.libraryTypography.ErrorText,
-                            color = Error,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-
-                // Forgot Password - Updated dengan navigasi
-                Text(
-                    text = "Forgot your password?",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp
-                    ),
-                    color = TextSecondary,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clickable { onNavigateToForgotPassword() }
-                        .padding(top = 4.dp, bottom = 8.dp)
-                )
-
-                // Login Button
+                // Reset Password Button
                 Button(
                     onClick = {
-                        viewModel.login()
+                        focusManager.clearFocus()
+                        viewModel.resetPassword()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -236,7 +212,7 @@ fun LoginScreen(
                         )
                     } else {
                         Text(
-                            text = "Log in",
+                            text = "Send Reset Link",
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -245,26 +221,21 @@ fun LoginScreen(
                     }
                 }
 
-                // "Don't have an account? Sign up" Row
-                Row(
+                // Back to Login Button
+                TextButton(
+                    onClick = onNavigateBack,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(top = 8.dp)
                 ) {
                     Text(
-                        text = "Don't have an account?",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = TextSecondary
+                        text = "Back to Login",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp
+                        ),
+                        color = Primary
                     )
-                    TextButton(onClick = onNavigateToRegister) {
-                        Text(
-                            "Sign up",
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = Primary
-                        )
-                    }
                 }
             }
 
@@ -287,8 +258,8 @@ fun LoginScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun ForgotPasswordScreenPreview() {
     SimpleLibraryManagementTheme {
-        LoginScreen()
+        ForgotPasswordScreen()
     }
 }
