@@ -1,18 +1,15 @@
 package com.example.simplelibrarymanagement.presentation.ui.screen.user.main
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +18,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.simplelibrarymanagement.presentation.ui.component.BottomNavigationBar
 import com.example.simplelibrarymanagement.presentation.ui.component.BottomNavItem
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
+import com.example.simplelibrarymanagement.presentation.ui.screen.user.booklist.BookListScreen
+import com.example.simplelibrarymanagement.presentation.ui.screen.user.home.HomeScreen
+import com.example.simplelibrarymanagement.presentation.ui.screen.user.profile.ProfileScreen
 
 /**
  * Composable utama yang menjadi kerangka untuk semua layar pengguna setelah login.
@@ -44,7 +44,7 @@ fun MainUserScreen(rootNavController: NavController) {
 
     Scaffold(
         topBar = {
-            // Judul TopAppBar bisa dibuat dinamis berdasarkan layar yang sedang aktif.
+            // Judul TopAppBar dibuat dinamis berdasarkan layar yang sedang aktif.
             val navBackStackEntry by userNavController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
             val currentScreen = bottomNavItems.find { it.route == currentRoute }
@@ -64,35 +64,26 @@ fun MainUserScreen(rootNavController: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.UserHome.route) {
-                // Ganti dengan composable HomeScreen yang sebenarnya nanti
-                // HomeScreen(navController = rootNavController)
-                // Placeholder:
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Home Screen Content")
-                }
+                HomeScreen(navController = rootNavController)
             }
             composable(Screen.UserBookList.route) {
-                // Ganti dengan composable BookListScreen yang sebenarnya nanti
-                // BookListScreen(navController = rootNavController)
-                // Placeholder:
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Book List Screen Content")
-                }
+                BookListScreen(navController = rootNavController)
             }
             composable(Screen.UserProfile.route) {
-                // Ganti dengan composable ProfileScreen yang sebenarnya nanti
-                // ProfileScreen(navController = rootNavController)
-                // Placeholder:
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Profile Screen Content")
-                }
+                ProfileScreen(
+                    onNavigateToAuth = {
+                        // Kembali ke AuthGraph dan hapus semua backstack
+                        rootNavController.navigate(Screen.AuthGraph.route) {
+                            popUpTo(Screen.UserGraph.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
             }
             // Anda bisa menambahkan rute lain yang diakses dari dalam user graph di sini,
             // contohnya, jika detail buku hanya bisa diakses dari daftar buku, rutenya bisa ada di sini.
-            // composable(Screen.UserBookDetail.route) { backStackEntry ->
-            //     val bookId = backStackEntry.arguments?.getString("bookId")
-            //     BookDetailScreen(bookId = bookId, navController = rootNavController)
-            // }
+            // Namun, lebih baik meletakkannya di NavGraph utama agar bisa diakses dari mana saja.
         }
     }
 }

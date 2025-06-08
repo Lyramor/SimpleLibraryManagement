@@ -3,4 +3,7 @@
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_books">Books</string>
     <string name="bottom_nav_profile">Profile</string>
+    <string name="admin_nav_dashboard">Dashboard</string>
+    <string name="admin_nav_manage_books">Books</string>
+    <string name="admin_nav_manage_users">Users</string>
 </resources>

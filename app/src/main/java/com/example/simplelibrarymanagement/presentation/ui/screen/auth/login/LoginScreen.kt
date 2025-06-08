@@ -42,7 +42,7 @@ fun LoginScreen(
     LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
             onLoginSuccess()
-            viewModel.resetLoginSuccess() // Reset state after navigation
+            viewModel.resetLoginSuccess()
         }
     }
 
@@ -53,7 +53,7 @@ fun LoginScreen(
                 message = it,
                 duration = SnackbarDuration.Long
             )
-            viewModel.clearError() // Clear error after showing
+            viewModel.clearError()
         }
     }
 
