@@ -21,66 +21,58 @@ import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 
 /**
  * Sealed class untuk mendefinisikan setiap item yang akan ditampilkan
- * di Bottom Navigation Bar. Ini membuat manajemen item menjadi lebih rapi dan aman.
- *
- * @property route Rute navigasi yang terkait dengan item.
- * @property titleResId Resource ID untuk judul item.
- * @property icon Ikon yang akan ditampilkan untuk item.
+ * di Bottom Navigation Bar Pengguna.
  */
-sealed class BottomNavItem(
+sealed class UserBottomNavItem(
     val route: String,
     val titleResId: Int,
     val icon: ImageVector
 ) {
-    data object Home : BottomNavItem(
+    data object Home : UserBottomNavItem(
         route = Screen.UserHome.route,
         titleResId = R.string.bottom_nav_home,
         icon = Icons.Default.Home
     )
-    data object BookList : BottomNavItem(
+    data object BookList : UserBottomNavItem(
         route = Screen.UserBookList.route,
         titleResId = R.string.bottom_nav_books,
         icon = Icons.Default.MenuBook
     )
-    data object Profile : BottomNavItem(
+    data object Profile : UserBottomNavItem(
         route = Screen.UserProfile.route,
         titleResId = R.string.bottom_nav_profile,
         icon = Icons.Default.AccountCircle
     )
 }
 
-
 /**
- * Composable untuk menampilkan Bottom Navigation Bar.
+ * Composable untuk menampilkan Bottom Navigation Bar Pengguna.
  *
- * @param navController NavController untuk menangani aksi navigasi.
- * @param items Daftar [BottomNavItem] yang akan ditampilkan.
+ * @param navControllerUser NavController untuk menangani aksi navigasi pengguna.
+ * @param items Daftar [UserBottomNavItem] yang akan ditampilkan.
  */
 @Composable
-fun BottomNavigationBar(
-    navController: NavController,
-    items: List<BottomNavItem>
+fun UserBottomNavigationBar(
+    navControllerUser: NavController,
+    items: List<UserBottomNavItem>
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val navBackStackEntry by navControllerUser.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        // Pop up ke start destination dari graph untuk menghindari penumpukan back stack
-                        navController.graph.startDestinationRoute?.let { route ->
+                    navControllerUser.navigate(item.route) {
+                        navControllerUser.graph.startDestinationRoute?.let { route ->
                             popUpTo(route) {
                                 saveState = true
                             }
                         }
-                        // Hindari membuat instance ganda dari destinasi yang sama
                         launchSingleTop = true
-                        // Kembalikan state saat memilih kembali item yang sebelumnya dipilih
                         restoreState = true
                     }
                 },
@@ -97,13 +89,3 @@ fun BottomNavigationBar(
         }
     }
 }
-
-// Jangan lupa untuk menambahkan string berikut ke dalam `app/src/main/res/values/strings.xml`:
-/*
-<resources>
-    ...
-    <string name="bottom_nav_home">Home</string>
-    <string name="bottom_nav_books">Books</string>
-    <string name="bottom_nav_profile">Profile</string>
-</resources>
-*/

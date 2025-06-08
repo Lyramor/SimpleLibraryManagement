@@ -19,7 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavItem
-import com.example.simplelibrarymanagement.presentation.ui.component.BottomNavigationBar
+import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavigationBar
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.managebook.ManageBookScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser.ManageUserScreen
@@ -54,7 +54,8 @@ fun MainAdminScreen(rootNavController: NavController) {
             )
         },
         bottomBar = {
-            BottomNavigationBar(navController = adminNavController, items = adminNavItems)
+            // Memanggil AdminBottomNavigationBar dengan daftar item yang benar
+            AdminBottomNavigationBar(navControllerAdmin = adminNavController, items = adminNavItems)
         }
     ) { innerPadding ->
         NavHost(

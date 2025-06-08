@@ -24,7 +24,7 @@ fun DialogManageBook(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (book == nil) "Add New Book" else "Edit Book") },
+        title = { Text(if (book == null) "Add New Book" else "Edit Book") },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
