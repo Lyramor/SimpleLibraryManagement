@@ -1,89 +1,99 @@
-package com.example.simplelibrarymanagement.presentation.ui.screen.user.main
+package com.example.simplelibrarymanagement.presentation.ui.component
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.example.simplelibrarymanagement.presentation.ui.component.BottomNavigationBar
-import com.example.simplelibrarymanagement.presentation.ui.component.BottomNavItem
+import com.example.simplelibrarymanagement.R
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
-import com.example.simplelibrarymanagement.presentation.ui.screen.user.booklist.BookListScreen
-import com.example.simplelibrarymanagement.presentation.ui.screen.user.home.HomeScreen
-import com.example.simplelibrarymanagement.presentation.ui.screen.user.profile.ProfileScreen
 
 /**
- * Composable utama yang menjadi kerangka untuk semua layar pengguna setelah login.
- * Mengatur tata letak umum dengan TopAppBar dan BottomNavigationBar.
+ * Sealed class untuk mendefinisikan setiap item yang akan ditampilkan
+ * di Bottom Navigation Bar. Ini membuat manajemen item menjadi lebih rapi dan aman.
  *
- * @param rootNavController NavController dari graph utama, digunakan untuk navigasi
- * ke luar dari lingkup pengguna (misal: logout atau ke detail).
+ * @property route Rute navigasi yang terkait dengan item.
+ * @property titleResId Resource ID untuk judul item.
+ * @property icon Ikon yang akan ditampilkan untuk item.
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun MainUserScreen(rootNavController: NavController) {
-    // NavController lokal untuk navigasi di dalam MainUserScreen (antara Home, BookList, Profile)
-    val userNavController = rememberNavController()
-
-    val bottomNavItems = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.BookList,
-        BottomNavItem.Profile
+sealed class BottomNavItem(
+    val route: String,
+    val titleResId: Int,
+    val icon: ImageVector
+) {
+    data object Home : BottomNavItem(
+        route = Screen.UserHome.route,
+        titleResId = R.string.bottom_nav_home,
+        icon = Icons.Default.Home
     )
+    data object BookList : BottomNavItem(
+        route = Screen.UserBookList.route,
+        titleResId = R.string.bottom_nav_books,
+        icon = Icons.Default.MenuBook
+    )
+    data object Profile : BottomNavItem(
+        route = Screen.UserProfile.route,
+        titleResId = R.string.bottom_nav_profile,
+        icon = Icons.Default.AccountCircle
+    )
+}
 
-    Scaffold(
-        topBar = {
-            // Judul TopAppBar dibuat dinamis berdasarkan layar yang sedang aktif.
-            val navBackStackEntry by userNavController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-            val currentScreen = bottomNavItems.find { it.route == currentRoute }
 
-            TopAppBar(
-                title = { Text(currentScreen?.let { stringResource(id = it.titleResId) } ?: "Library") }
-            )
-        },
-        bottomBar = {
-            BottomNavigationBar(navController = userNavController, items = bottomNavItems)
-        }
-    ) { innerPadding ->
-        // NavHost untuk konten utama pengguna
-        NavHost(
-            navController = userNavController,
-            startDestination = Screen.UserHome.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(Screen.UserHome.route) {
-                HomeScreen(navController = rootNavController)
-            }
-            composable(Screen.UserBookList.route) {
-                BookListScreen(navController = rootNavController)
-            }
-            composable(Screen.UserProfile.route) {
-                ProfileScreen(
-                    onNavigateToAuth = {
-                        // Kembali ke AuthGraph dan hapus semua backstack
-                        rootNavController.navigate(Screen.AuthGraph.route) {
-                            popUpTo(Screen.UserGraph.route) {
-                                inclusive = true
+/**
+ * Composable untuk menampilkan Bottom Navigation Bar.
+ *
+ * @param navController NavController untuk menangani aksi navigasi.
+ * @param items Daftar [BottomNavItem] yang akan ditampilkan.
+ */
+@Composable
+fun BottomNavigationBar(
+    navController: NavController,
+    items: List<BottomNavItem> // DIperbaiki: Menggunakan BottomNavItem, bukan AdminBottomNavItem
+) {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+
+        items.forEach { item ->
+            NavigationBarItem(
+                selected = currentRoute == item.route,
+                onClick = {
+                    navController.navigate(item.route) {
+                        // Pop up ke start destination dari graph untuk menghindari penumpukan back stack
+                        navController.graph.startDestinationRoute?.let { route ->
+                            popUpTo(route) {
+                                saveState = true
                             }
                         }
+                        // Hindari membuat instance ganda dari destinasi yang sama
+                        launchSingleTop = true
+                        // Kembalikan state saat memilih kembali item yang sebelumnya dipilih
+                        restoreState = true
                     }
+                },
+                icon = { Icon(item.icon, contentDescription = stringResource(id = item.titleResId)) },
+                label = { Text(text = stringResource(id = item.titleResId)) },
+                alwaysShowLabel = true,
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            // Anda bisa menambahkan rute lain yang diakses dari dalam user graph di sini,
-            // contohnya, jika detail buku hanya bisa diakses dari daftar buku, rutenya bisa ada di sini.
-            // Namun, lebih baik meletakkannya di NavGraph utama agar bisa diakses dari mana saja.
+            )
         }
     }
 }

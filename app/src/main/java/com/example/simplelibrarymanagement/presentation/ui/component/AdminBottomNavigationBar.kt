@@ -48,26 +48,26 @@ sealed class AdminBottomNavItem(
 /**
  * Composable untuk menampilkan Bottom Navigation Bar khusus Admin.
  *
- * @param navController NavController untuk menangani aksi navigasi.
+ * @param navControllerAdmin NavController untuk menangani aksi navigasi admin.
  * @param items Daftar [AdminBottomNavItem] yang akan ditampilkan.
  */
 @Composable
 fun AdminBottomNavigationBar(
-    navController: NavController,
+    navControllerAdmin: NavController,
     items: List<AdminBottomNavItem>
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val navBackStackEntry by navControllerAdmin.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let { route ->
+                    navControllerAdmin.navigate(item.route) {
+                        navControllerAdmin.graph.startDestinationRoute?.let { route ->
                             popUpTo(route) {
                                 saveState = true
                             }
@@ -80,7 +80,7 @@ fun AdminBottomNavigationBar(
                 label = { Text(text = stringResource(id = item.titleResId)) },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.secondary, // Warna berbeda untuk admin
+                    selectedIconColor = MaterialTheme.colorScheme.secondary,
                     selectedTextColor = MaterialTheme.colorScheme.secondary,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
