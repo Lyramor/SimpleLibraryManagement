@@ -1,20 +1,8 @@
 package com.example.simplelibrarymanagement.presentation.ui.component
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,44 +12,27 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.simplelibrarymanagement.R
-import com.example.simplelibrarymanagement.domain.model.Category // BARU: Import model Category
-import com.example.simplelibrarymanagement.presentation.ui.theme.SimpleLibraryManagementTheme
+import com.example.simplelibrarymanagement.domain.model.Category
 
-/**
- * Enum untuk merepresentasikan status buku.
- * @property displayName Nama status yang akan ditampilkan.
- * @property color Warna yang akan digunakan untuk status tersebut.
- */
 enum class BookStatus(val displayName: String, val color: Color) {
     Available("Available", Color(0xFF388E3C)),
     Borrowed("Borrowed", Color(0xFFF57C00))
 }
 
-/**
- * Composable untuk menampilkan kartu buku yang informatif dan dapat diklik.
- *
- * @param title Judul buku.
- * @param author Penulis buku.
- * @param imageUrl URL gambar sampul buku.
- * @param status Status ketersediaan buku ([BookStatus]).
- * @param category Kategori buku (BARU).
- * @param onClick Aksi yang dijalankan ketika kartu diklik.
- * @param modifier Modifier untuk kustomisasi.
- */
 @Composable
 fun CardBook(
     title: String,
     author: String,
     imageUrl: String,
     status: BookStatus,
-    category: Category?, // BARU: Tambahkan parameter kategori
+    category: Category?,
     onClick: () -> Unit,
+    onCategoryClick: (Category) -> Unit, // DIUBAH: Parameter untuk aksi klik kategori
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -76,7 +47,6 @@ fun CardBook(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Book Cover Image
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
@@ -93,19 +63,20 @@ fun CardBook(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Book Details
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // BARU: Tampilkan Kategori jika ada
-                category?.let {
+                category?.let { cat ->
                     Text(
-                        text = it.name,
+                        text = cat.name,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 2.dp)
+                        modifier = Modifier
+                            .padding(bottom = 2.dp)
+                            // DIUBAH: Membuat teks kategori bisa di-klik
+                            .clickable { onCategoryClick(cat) }
                     )
                 }
 
@@ -132,9 +103,6 @@ fun CardBook(
     }
 }
 
-/**
- * Composable kecil untuk menampilkan status buku dalam bentuk chip.
- */
 @Composable
 private fun BookStatusChip(status: BookStatus) {
     Surface(
@@ -149,39 +117,6 @@ private fun BookStatusChip(status: BookStatus) {
                 fontSize = 12.sp
             ),
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-        )
-    }
-}
-
-
-@Preview(showBackground = true, name = "Card Book - Available")
-@Composable
-fun CardBookAvailablePreview() {
-    SimpleLibraryManagementTheme {
-        CardBook(
-            title = "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones",
-            author = "James Clear",
-            imageUrl = "",
-            status = BookStatus.Available,
-            // DIUBAH: Tambahkan data kategori untuk preview
-            category = Category(id = 1, name = "Self-Improvement"),
-            onClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Card Book - Borrowed")
-@Composable
-fun CardBookBorrowedPreview() {
-    SimpleLibraryManagementTheme {
-        CardBook(
-            title = "Sapiens: A Brief History of Humankind",
-            author = "Yuval Noah Harari",
-            imageUrl = "",
-            status = BookStatus.Borrowed,
-            // DIUBAH: Tambahkan data kategori untuk preview
-            category = Category(id = 2, name = "Science"),
-            onClick = {}
         )
     }
 }

@@ -28,7 +28,7 @@ fun HomeScreen(
 
     when {
         uiState.isLoading -> LoadingScreen(message = "Loading your library...")
-        uiState.errorMessage != null -> NetworkErrorMessage( // Diperbaiki dari != nil
+        uiState.errorMessage != null -> NetworkErrorMessage(
             message = uiState.errorMessage ?: "An error occurred.",
             onRetry = viewModel::loadHomePageData
         )
@@ -112,8 +112,9 @@ private fun BookCarouselSection(
                         author = book.author,
                         imageUrl = book.imageUrl,
                         status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
+                        category = book.category, // DIUBAH: Teruskan informasi kategori
                         onClick = { onBookClick(book.id) },
-                        modifier = Modifier.width(280.dp) // A fixed width for carousel items
+                        modifier = Modifier.width(280.dp)
                     )
                 }
             }

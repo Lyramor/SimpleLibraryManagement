@@ -22,9 +22,14 @@ sealed class Screen(val route: String) {
     data object UserHome : Screen("user_home_screen")
     data object UserBookList : Screen("user_book_list_screen")
     data object UserProfile : Screen("user_profile_screen")
-    // Contoh rute dengan argumen
+
     data object UserBookDetail : Screen("user_book_detail_screen/{bookId}") {
         fun createRoute(bookId: String) = "user_book_detail_screen/$bookId"
+    }
+
+    // BARU: Menambahkan rute untuk halaman buku berdasarkan kategori
+    data object UserBookByCategory : Screen("user_book_by_category_screen/{categoryId}/{categoryName}") {
+        fun createRoute(categoryId: Int, categoryName: String) = "user_book_by_category_screen/$categoryId/$categoryName"
     }
 
     // --- Layar Admin ---

@@ -13,12 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.simplelibrarymanagement.R
 import com.example.simplelibrarymanagement.presentation.ui.theme.libraryColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +29,7 @@ fun ProfileScreen(
 
     // Handle logout navigation
     LaunchedEffect(uiState.isLogoutDialogVisible) {
-        // Navigation akan dilakukan melalui dialog action
+        // Navigation akan ditangani melalui aksi pada dialog
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -125,7 +123,7 @@ fun ProfileScreen(
     // Show error message
     uiState.errorMessage?.let { message ->
         LaunchedEffect(message) {
-            // Show snackbar or toast
+            // Anda bisa menampilkan Snackbar di sini jika mau
             viewModel.clearErrorMessage()
         }
     }
@@ -133,7 +131,7 @@ fun ProfileScreen(
     // Show success message
     if (uiState.updateProfileSuccess) {
         LaunchedEffect(uiState.updateProfileSuccess) {
-            // Show success message
+            // Anda bisa menampilkan Snackbar sukses di sini jika mau
             viewModel.hideEditProfileDialog()
         }
     }
@@ -152,7 +150,6 @@ private fun ProfileHeader(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Avatar
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -170,7 +167,6 @@ private fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // User Info
             userProfile?.let { profile ->
                 Text(
                     text = profile.name,
@@ -182,7 +178,6 @@ private fun ProfileHeader(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
                 profile.phoneNumber?.let { phone ->
                     Text(
                         text = phone,
@@ -190,17 +185,13 @@ private fun ProfileHeader(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = "Bergabung sejak ${profile.joinDate}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
                 Spacer(modifier = Modifier.height(12.dp))
-
                 OutlinedButton(
                     onClick = onEditProfile,
                     modifier = Modifier.fillMaxWidth()
@@ -257,9 +248,7 @@ private fun StatItem(
     label: String,
     color: androidx.compose.ui.graphics.Color
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             style = MaterialTheme.typography.headlineMedium,
@@ -289,6 +278,15 @@ private fun BorrowedBookCard(borrowedBook: BorrowedBook) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
+                    borrowedBook.categoryName?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
                     Text(
                         text = borrowedBook.bookTitle,
                         style = MaterialTheme.typography.titleMedium,
@@ -301,7 +299,6 @@ private fun BorrowedBookCard(borrowedBook: BorrowedBook) {
                     )
                 }
 
-                // Status badge
                 Surface(
                     color = if (borrowedBook.isOverdue)
                         MaterialTheme.libraryColors.overdue
@@ -389,19 +386,13 @@ private fun SettingsItem(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isDestructive)
-                    MaterialTheme.libraryColors.overdue
-                else
-                    MaterialTheme.colorScheme.onSurface
+                tint = if (isDestructive) MaterialTheme.libraryColors.overdue else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (isDestructive)
-                    MaterialTheme.libraryColors.overdue
-                else
-                    MaterialTheme.colorScheme.onSurface
+                color = if (isDestructive) MaterialTheme.libraryColors.overdue else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -445,12 +436,8 @@ private fun LogoutDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text("Konfirmasi Logout")
-        },
-        text = {
-            Text("Apakah Anda yakin ingin keluar dari aplikasi?")
-        },
+        title = { Text("Konfirmasi Logout") },
+        text = { Text("Apakah Anda yakin ingin keluar dari aplikasi?") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Logout")
@@ -477,13 +464,9 @@ private fun EditProfileDialog(
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },
-        title = {
-            Text("Edit Profil")
-        },
+        title = { Text("Edit Profil") },
         text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -513,10 +496,7 @@ private fun EditProfileDialog(
                 enabled = !isLoading && name.isNotBlank()
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 } else {
                     Text("Simpan")
                 }

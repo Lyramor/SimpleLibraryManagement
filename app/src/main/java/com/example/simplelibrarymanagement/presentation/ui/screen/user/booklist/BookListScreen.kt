@@ -28,25 +28,21 @@ fun BookListScreen(
 
     when {
         uiState.isLoading -> {
-            // Tampilkan skeleton loading saat data sedang diambil
             BookListSkeleton()
         }
         uiState.errorMessage != null -> {
-            // Tampilkan pesan error jika terjadi masalah
             ErrorMessage(
                 message = uiState.errorMessage ?: "An unknown error occurred.",
                 modifier = Modifier.fillMaxSize()
             )
         }
         uiState.books.isEmpty() -> {
-            // Tampilkan pesan jika tidak ada buku yang tersedia
             EmptyState(
                 title = "No Books Available",
                 description = "There are currently no books in the library. Please check back later."
             )
         }
         else -> {
-            // Tampilkan daftar buku jika data berhasil diambil dan tidak kosong
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
@@ -58,8 +54,8 @@ fun BookListScreen(
                         author = book.author,
                         imageUrl = book.imageUrl,
                         status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
+                        category = book.category, // DIUBAH: Teruskan informasi kategori
                         onClick = {
-                            // Navigasi ke layar detail buku dengan membawa ID buku
                             navController.navigate(Screen.UserBookDetail.createRoute(book.id))
                         }
                     )

@@ -89,6 +89,16 @@ fun BookDetailScreen(
                         text = "by ${book.author}",
                         style = MaterialTheme.typography.titleMedium
                     )
+
+                    // DIUBAH: Menambahkan tampilan untuk kategori
+                    book.category?.let { category ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        SuggestionChip(
+                            onClick = { /* Tidak ada aksi */ },
+                            label = { Text(category.name) }
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = book.description,
