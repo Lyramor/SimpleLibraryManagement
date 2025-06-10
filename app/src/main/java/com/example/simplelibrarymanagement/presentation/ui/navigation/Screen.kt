@@ -32,4 +32,5 @@ sealed class Screen(val route: String) {
     data object AdminDashboard : Screen("admin_dashboard_screen")
     data object AdminManageBooks : Screen("admin_manage_books_screen")
     data object AdminManageUsers : Screen("admin_manage_users_screen")
+    data object AdminManageCategory : Screen("admin_manage_category_screen")
 }

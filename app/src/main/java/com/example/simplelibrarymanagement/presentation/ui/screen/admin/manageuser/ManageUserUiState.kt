@@ -1,11 +1,6 @@
 package com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser
 
-data class User(
-    val id: String,
-    val name: String,
-    val email: String,
-    val role: String // e.g., "Admin", "User"
-)
+import com.example.simplelibrarymanagement.domain.model.User
 
 data class ManageUserUiState(
     val isLoading: Boolean = false,
@@ -13,5 +8,8 @@ data class ManageUserUiState(
     val errorMessage: String? = null,
     val searchQuery: String = "",
     val userToDelete: User? = null,
+
+    // BARU: State untuk dialog tambah/edit
+    val showUserDialog: Boolean = false,
     val userToEdit: User? = null
 )

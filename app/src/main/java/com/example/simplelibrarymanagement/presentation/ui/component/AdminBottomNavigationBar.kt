@@ -2,6 +2,7 @@ package com.example.simplelibrarymanagement.presentation.ui.component
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Category // DIUBAH: Import ikon baru
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.Icon
@@ -37,6 +38,12 @@ sealed class AdminBottomNavItem(
         route = Screen.AdminManageBooks.route,
         titleResId = R.string.admin_nav_manage_books,
         icon = Icons.Default.Book
+    )
+    // BARU: Menambahkan item untuk Manage Categories
+    object ManageCategories : AdminBottomNavItem(
+        route = Screen.AdminManageCategory.route,
+        titleResId = R.string.admin_nav_manage_categories,
+        icon = Icons.Default.Category
     )
     object ManageUsers : AdminBottomNavItem(
         route = Screen.AdminManageUsers.route,

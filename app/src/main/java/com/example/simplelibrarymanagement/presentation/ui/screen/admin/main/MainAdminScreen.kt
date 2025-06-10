@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,28 +20,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.simplelibrarymanagement.R
 import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavItem
 import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavigationBar
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.managebook.ManageBookScreen
+import com.example.simplelibrarymanagement.presentation.ui.screen.admin.managecategory.ManageCategoryScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser.ManageUserScreen
 
-/**
- * Composable utama yang menjadi kerangka untuk semua layar admin setelah login.
- *
- * @param rootNavController NavController dari graph utama, digunakan untuk navigasi
- * ke luar dari lingkup admin (misal: logout).
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainAdminScreen(rootNavController: NavController) {
-    // NavController lokal untuk navigasi antar layar di dalam seksi admin.
     val adminNavController = rememberNavController()
 
+    // DIUBAH: Menambahkan item navigasi kategori
     val adminNavItems = listOf(
         AdminBottomNavItem.Dashboard,
         AdminBottomNavItem.ManageBooks,
+        AdminBottomNavItem.ManageCategories, // Ditambahkan
         AdminBottomNavItem.ManageUsers
     )
 
@@ -54,7 +53,6 @@ fun MainAdminScreen(rootNavController: NavController) {
             )
         },
         bottomBar = {
-            // Memanggil AdminBottomNavigationBar dengan daftar item yang benar
             AdminBottomNavigationBar(navControllerAdmin = adminNavController, items = adminNavItems)
         }
     ) { innerPadding ->
@@ -64,11 +62,14 @@ fun MainAdminScreen(rootNavController: NavController) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.AdminDashboard.route) {
-                // Untuk saat ini, kita akan tampilkan placeholder
                 AdminDashboardScreen(navController = adminNavController)
             }
             composable(Screen.AdminManageBooks.route) {
                 ManageBookScreen()
+            }
+            // BARU: Menambahkan composable untuk layar kategori
+            composable(Screen.AdminManageCategory.route) {
+                ManageCategoryScreen()
             }
             composable(Screen.AdminManageUsers.route) {
                 ManageUserScreen()

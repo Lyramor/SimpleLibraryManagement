@@ -6,4 +6,8 @@ interface BookRepository {
     suspend fun getBookById(bookId: String): Book?
     suspend fun getAllBooks(): List<Book>
     suspend fun borrowBook(bookId: String)
+
+    suspend fun addBook(book: Book)
+    suspend fun updateBook(book: Book)
+    suspend fun deleteBook(bookId: String)
 }

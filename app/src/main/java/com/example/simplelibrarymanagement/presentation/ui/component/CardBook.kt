@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.simplelibrarymanagement.R
+import com.example.simplelibrarymanagement.domain.model.Category // BARU: Import model Category
 import com.example.simplelibrarymanagement.presentation.ui.theme.SimpleLibraryManagementTheme
-import com.example.simplelibrarymanagement.presentation.ui.theme.libraryColors
 
 /**
  * Enum untuk merepresentasikan status buku.
@@ -50,6 +50,7 @@ enum class BookStatus(val displayName: String, val color: Color) {
  * @param author Penulis buku.
  * @param imageUrl URL gambar sampul buku.
  * @param status Status ketersediaan buku ([BookStatus]).
+ * @param category Kategori buku (BARU).
  * @param onClick Aksi yang dijalankan ketika kartu diklik.
  * @param modifier Modifier untuk kustomisasi.
  */
@@ -59,6 +60,7 @@ fun CardBook(
     author: String,
     imageUrl: String,
     status: BookStatus,
+    category: Category?, // BARU: Tambahkan parameter kategori
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -79,8 +81,8 @@ fun CardBook(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(imageUrl)
                     .crossfade(true)
-                    .placeholder(R.drawable.ic_launcher_background) // Ganti dengan placeholder yang sesuai
-                    .error(R.drawable.ic_launcher_background)       // Ganti dengan gambar error yang sesuai
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
                     .build(),
                 contentDescription = "Book Cover",
                 contentScale = ContentScale.Crop,
@@ -96,6 +98,17 @@ fun CardBook(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                // BARU: Tampilkan Kategori jika ada
+                category?.let {
+                    Text(
+                        text = it.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -148,8 +161,10 @@ fun CardBookAvailablePreview() {
         CardBook(
             title = "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones",
             author = "James Clear",
-            imageUrl = "", // URL gambar bisa dikosongkan untuk preview
+            imageUrl = "",
             status = BookStatus.Available,
+            // DIUBAH: Tambahkan data kategori untuk preview
+            category = Category(id = 1, name = "Self-Improvement"),
             onClick = {}
         )
     }
@@ -162,8 +177,10 @@ fun CardBookBorrowedPreview() {
         CardBook(
             title = "Sapiens: A Brief History of Humankind",
             author = "Yuval Noah Harari",
-            imageUrl = "", // URL gambar bisa dikosongkan untuk preview
+            imageUrl = "",
             status = BookStatus.Borrowed,
+            // DIUBAH: Tambahkan data kategori untuk preview
+            category = Category(id = 2, name = "Science"),
             onClick = {}
         )
     }

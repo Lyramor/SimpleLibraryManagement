@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplelibrarymanagement.domain.model.Book
 import com.example.simplelibrarymanagement.domain.repository.BookRepository
+import com.example.simplelibrarymanagement.domain.repository.CategoryRepository // DIASUMSIKAN ADA
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,33 +14,42 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ManageBookViewModel @Inject constructor(
-    private val bookRepository: BookRepository
+    private val bookRepository: BookRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ManageBookUiState())
     val uiState: StateFlow<ManageBookUiState> = _uiState.asStateFlow()
 
     init {
-        fetchBooks()
+        // Mengambil data awal (buku dan kategori) saat ViewModel dibuat
+        loadInitialData()
     }
 
-    fun fetchBooks() {
+    // DIUBAH: Mengambil buku dan kategori secara bersamaan
+    fun loadInitialData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
+                // Mengambil data dari kedua repositori
                 val books = bookRepository.getAllBooks()
-                _uiState.value = _uiState.value.copy(isLoading = false, books = books)
+                val categories = categoryRepository.getAllCategories() // Memanggil fungsi dari repo kategori
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    books = books,
+                    categories = categories // Menyimpan daftar kategori ke state
+                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load books."
+                    errorMessage = "Failed to load data. Please check connection."
                 )
             }
         }
     }
 
     fun onSearchQueryChanged(query: String) {
-        // This would be more efficient with a local cache or a smarter repository
         viewModelScope.launch {
             val allBooks = bookRepository.getAllBooks()
             val filtered = allBooks.filter {
@@ -61,15 +71,34 @@ class ManageBookViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(showDialog = false, selectedBook = null)
     }
 
+    // DIUBAH: Logika menyimpan buku menjadi lebih jelas
     fun onBookSave(book: Book) {
-        // In a real app, you'd call repository.addBook(book) or repository.updateBook(book)
-        // For this example, we just refresh the list from the mock repository
-        onDialogDismiss()
-        fetchBooks() // Re-fetch to simulate update
+        viewModelScope.launch {
+            try {
+                // Membedakan antara menambah buku baru atau mengedit
+                if (_uiState.value.selectedBook == null) {
+                    // Logika untuk menambah buku baru
+                    bookRepository.addBook(book)
+                } else {
+                    // Logika untuk mengedit buku yang sudah ada
+                    bookRepository.updateBook(book)
+                }
+                onDialogDismiss()
+                loadInitialData() // Muat ulang data untuk menampilkan perubahan
+            } catch(e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Failed to save book.")
+            }
+        }
     }
 
     fun onDeleteBook(bookId: String) {
-        // In a real app, call repository.deleteBook(bookId)
-        fetchBooks() // Re-fetch to simulate update
+        viewModelScope.launch {
+            try {
+                bookRepository.deleteBook(bookId)
+                loadInitialData() // Muat ulang data
+            } catch(e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Failed to delete book.")
+            }
+        }
     }
 }
