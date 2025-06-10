@@ -42,6 +42,7 @@ data class BorrowedBook(
     val bookCoverUrl: String?,
     val borrowDate: String,
     val dueDate: String,
+    val categoryName: String?, // DIUBAH: Menambahkan kategori
     val isOverdue: Boolean = false
 )
 

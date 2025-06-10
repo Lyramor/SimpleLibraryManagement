@@ -1,9 +1,10 @@
-package com.example.simplelibrarymanagement.presentation.ui.screen.auth.login
+package com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplelibrarymanagement.domain.model.User
+import com.example.simplelibrarymanagement.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,107 +12,94 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
-    // Inject your authentication repository here
-    // private val authRepository: AuthRepository
+class ManageUserViewModel @Inject constructor(
+    private val userRepository: UserRepository // DIUBAH: Inject repositori asli
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState()) //
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow() //
+    private val _uiState = MutableStateFlow(ManageUserUiState())
+    val uiState: StateFlow<ManageUserUiState> = _uiState.asStateFlow()
 
-    fun updateUsername(username: String) {
-        _uiState.value = _uiState.value.copy( //
-            username = username, //
-            usernameError = validateUsername(username) //
-        )
+    init {
+        loadUsers()
     }
 
-    fun updatePassword(password: String) {
-        _uiState.value = _uiState.value.copy( //
-            password = password, //
-            passwordError = validatePassword(password) //
-        )
-    }
-
-    fun login() {
-        val currentState = _uiState.value //
-
-        // Validate form before submitting
-        val usernameError = validateUsername(currentState.username) //
-        val passwordError = validatePassword(currentState.password) //
-
-        if (usernameError != null || passwordError != null) { //
-            _uiState.value = currentState.copy( //
-                usernameError = usernameError, //
-                passwordError = passwordError //
-            )
-            return
-        }
-
-        // Proceed with login
-        viewModelScope.launch { //
-            _uiState.value = currentState.copy( //
-                isLoading = true, //
-                errorMessage = null //
-            )
-
+    fun loadUsers() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                // Simulate API call - replace with actual authentication logic
-                delay(2000) // // Simulate network delay
-
-                // Mock authentication - replace with real implementation
-                val isLoginSuccessful = authenticateUser( //
-                    currentState.username, //
-                    currentState.password //
-                )
-
-                if (isLoginSuccessful) { //
-                    _uiState.value = currentState.copy( //
-                        isLoading = false, //
-                        isLoginSuccess = true //
-                    )
-                } else {
-                    _uiState.value = currentState.copy( //
-                        isLoading = false, //
-                        errorMessage = "Invalid username or password" //
-                    )
-                }
+                val users = userRepository.getUsers()
+                _uiState.value = _uiState.value.copy(isLoading = false, users = users)
             } catch (e: Exception) {
-                _uiState.value = currentState.copy( //
-                    isLoading = false, //
-                    errorMessage = "Login failed. Please try again." //
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to load users."
                 )
             }
         }
     }
 
-    private fun validateUsername(username: String): String? { //
-        return when {
-            username.isBlank() -> "Username is required" //
-            username.length < 3 -> "Username must be at least 3 characters" //
-            else -> null
+    fun onSearchQueryChanged(query: String) {
+        // Implementasi pencarian di sisi klien (untuk saat ini)
+        // Anda dapat memperbaikinya nanti untuk melakukan pencarian di sisi server via API
+        viewModelScope.launch {
+            val allUsers = userRepository.getUsers()
+            val filteredUsers = allUsers.filter {
+                it.name.contains(query, ignoreCase = true) || it.email.contains(query, ignoreCase = true)
+            }
+            _uiState.value = _uiState.value.copy(searchQuery = query, users = filteredUsers)
         }
     }
 
-    private fun validatePassword(password: String): String? { //
-        return when {
-            password.isBlank() -> "Password is required" //
-            password.length < 6 -> "Password must be at least 6 characters" //
-            else -> null
+    // --- Logika untuk dialog tambah/edit ---
+    fun onAddNewUserClick() {
+        _uiState.value = _uiState.value.copy(showUserDialog = true, userToEdit = null)
+    }
+
+    fun onEditUserClick(user: User) {
+        _uiState.value = _uiState.value.copy(showUserDialog = true, userToEdit = user)
+    }
+
+    fun onUserDialogDismiss() {
+        _uiState.value = _uiState.value.copy(showUserDialog = false, userToEdit = null)
+    }
+
+    fun onUserSave(user: User) {
+        viewModelScope.launch {
+            try {
+                if (_uiState.value.userToEdit == null) {
+                    userRepository.addUser(user)
+                } else {
+                    userRepository.updateUser(user)
+                }
+                onUserDialogDismiss()
+                loadUsers()
+            } catch(e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Failed to save user.")
+            }
         }
     }
 
-    private suspend fun authenticateUser(username: String, password: String): Boolean { //
-        // Mock authentication logic
-        // Replace this with actual API call to your backend
-        return username == "admin" && password == "password123" //
+    // --- Logika untuk dialog hapus ---
+    fun onUserDeleteRequest(user: User) {
+        _uiState.value = _uiState.value.copy(userToDelete = user)
     }
 
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null) //
+    fun onConfirmUserDelete() {
+        viewModelScope.launch {
+            val user = _uiState.value.userToDelete
+            user?.let {
+                try {
+                    userRepository.deleteUser(it.id)
+                    _uiState.value = _uiState.value.copy(userToDelete = null)
+                    loadUsers()
+                } catch(e: Exception) {
+                    _uiState.value = _uiState.value.copy(errorMessage = "Failed to delete user.")
+                }
+            }
+        }
     }
 
-    fun resetLoginSuccess() {
-        _uiState.value = _uiState.value.copy(isLoginSuccess = false) //
+    fun onDismissDeleteDialog() {
+        _uiState.value = _uiState.value.copy(userToDelete = null)
     }
 }

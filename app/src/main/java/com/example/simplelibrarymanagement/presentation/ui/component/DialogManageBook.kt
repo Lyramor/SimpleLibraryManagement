@@ -2,16 +2,21 @@ package com.example.simplelibrarymanagement.presentation.ui.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.simplelibrarymanagement.domain.model.Book
+import com.example.simplelibrarymanagement.domain.model.Category // DIASUMSIKAN ADA
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogManageBook(
-    book: Book?, // Null if adding a new book
+    book: Book?, // Null jika menambah buku baru
+    categories: List<Category>, // BARU: Daftar kategori untuk dropdown
     onDismiss: () -> Unit,
     onConfirm: (Book) -> Unit
 ) {
@@ -19,8 +24,13 @@ fun DialogManageBook(
     var author by remember { mutableStateOf(book?.author ?: "") }
     var description by remember { mutableStateOf(book?.description ?: "") }
     var imageUrl by remember { mutableStateOf(book?.imageUrl ?: "") }
+    var year by remember { mutableStateOf(book?.year?.toString() ?: "") } // BARU
 
-    val isFormValid = title.isNotBlank() && author.isNotBlank() && description.isNotBlank()
+    // State untuk dropdown kategori
+    var isCategoryExpanded by remember { mutableStateOf(false) } // BARU
+    var selectedCategory by remember { mutableStateOf(book?.category) } // BARU
+
+    val isFormValid = title.isNotBlank() && author.isNotBlank() && description.isNotBlank() && year.isNotBlank() && selectedCategory != null
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -28,7 +38,7 @@ fun DialogManageBook(
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp) // Beri jarak lebih
             ) {
                 OutlinedTextField(
                     value = title,
@@ -42,6 +52,47 @@ fun DialogManageBook(
                     label = { Text("Author") },
                     isError = author.isBlank()
                 )
+                // BARU: Input untuk Tahun
+                OutlinedTextField(
+                    value = year,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) year = it },
+                    label = { Text("Year") },
+                    isError = year.isBlank(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+
+                // BARU: Dropdown untuk Kategori
+                ExposedDropdownMenuBox(
+                    expanded = isCategoryExpanded,
+                    onExpandedChange = { isCategoryExpanded = !isCategoryExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedCategory?.name ?: "Select Category",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Category") },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryExpanded)
+                        },
+                        modifier = Modifier.menuAnchor(),
+                        isError = selectedCategory == null
+                    )
+                    ExposedDropdownMenu(
+                        expanded = isCategoryExpanded,
+                        onDismissRequest = { isCategoryExpanded = false }
+                    ) {
+                        categories.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.name) },
+                                onClick = {
+                                    selectedCategory = category
+                                    isCategoryExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
@@ -63,9 +114,11 @@ fun DialogManageBook(
                         id = book?.id ?: System.currentTimeMillis().toString(),
                         title = title,
                         author = author,
+                        year = year.toIntOrNull(), // DIUBAH
                         description = description,
                         imageUrl = imageUrl,
-                        isAvailable = book?.isAvailable ?: true
+                        isAvailable = book?.isAvailable ?: true,
+                        category = selectedCategory // DIUBAH
                     )
                     onConfirm(newBook)
                 },

@@ -8,14 +8,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplelibrarymanagement.presentation.ui.component.CardUser
+import com.example.simplelibrarymanagement.presentation.ui.component.DialogManageUser
+import com.example.simplelibrarymanagement.presentation.ui.component.EmptyState
 import com.example.simplelibrarymanagement.presentation.ui.component.LoadingScreen
 import com.example.simplelibrarymanagement.presentation.ui.component.NetworkErrorMessage
-import com.example.simplelibrarymanagement.presentation.ui.component.SearchTextField
+import com.example.simplelibrarymanagement.presentation.ui.component.SearchTextField // DIUBAH: Menambahkan import ini
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +27,8 @@ fun ManageUserScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* TODO: Open add user dialog */ }) {
+            // DIUBAH: Menghubungkan tombol FAB ke ViewModel
+            FloatingActionButton(onClick = viewModel::onAddNewUserClick) {
                 Icon(Icons.Default.Add, contentDescription = "Add User")
             }
         }
@@ -53,6 +55,7 @@ fun ManageUserScreen(
             when {
                 uiState.isLoading -> LoadingScreen()
                 uiState.errorMessage != null -> NetworkErrorMessage(message = uiState.errorMessage!!)
+                uiState.users.isEmpty() -> EmptyState(title="No Users", description="There are no users to display.")
                 else -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -62,7 +65,7 @@ fun ManageUserScreen(
                                 name = user.name,
                                 email = user.email,
                                 role = user.role,
-                                onEditClick = { /* TODO: Show edit dialog */ },
+                                onEditClick = { viewModel.onEditUserClick(user) }, // DIUBAH
                                 onDeleteClick = { viewModel.onUserDeleteRequest(user) }
                             )
                         }
@@ -72,7 +75,7 @@ fun ManageUserScreen(
         }
     }
 
-    // Confirmation Dialog for Deletion
+    // DIALOG KONFIRMASI HAPUS
     uiState.userToDelete?.let { user ->
         AlertDialog(
             onDismissRequest = viewModel::onDismissDeleteDialog,
@@ -91,6 +94,15 @@ fun ManageUserScreen(
                     Text("Cancel")
                 }
             }
+        )
+    }
+
+    // BARU: DIALOG TAMBAH/EDIT PENGGUNA
+    if (uiState.showUserDialog) {
+        DialogManageUser(
+            user = uiState.userToEdit,
+            onDismiss = viewModel::onUserDialogDismiss,
+            onConfirm = viewModel::onUserSave
         )
     }
 }

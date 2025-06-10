@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.simplelibrarymanagement.domain.model.Book
 import com.example.simplelibrarymanagement.presentation.ui.component.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,14 @@ fun ManageBookScreen(
             when {
                 uiState.isLoading -> BookListSkeleton()
                 uiState.errorMessage != null -> NetworkErrorMessage(message = uiState.errorMessage!!)
+                uiState.books.isEmpty() && uiState.searchQuery.isNotBlank() -> {
+                    // State ketika pencarian tidak menemukan hasil
+                    EmptyState(title = "Not Found", description = "No books match your search query.")
+                }
+                uiState.books.isEmpty() -> {
+                    // State ketika tidak ada buku sama sekali
+                    EmptyState(title = "No Books", description = "There are no books in the library yet.")
+                }
                 else -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -68,8 +77,10 @@ fun ManageBookScreen(
     }
 
     if (uiState.showDialog) {
+        // DIUBAH: Meneruskan daftar kategori ke dialog
         DialogManageBook(
             book = uiState.selectedBook,
+            categories = uiState.categories, // Teruskan daftar kategori
             onDismiss = viewModel::onDialogDismiss,
             onConfirm = viewModel::onBookSave
         )
@@ -78,7 +89,7 @@ fun ManageBookScreen(
 
 @Composable
 fun AdminCardBook(
-    book: com.example.simplelibrarymanagement.domain.model.Book,
+    book: Book,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
@@ -92,7 +103,8 @@ fun AdminCardBook(
                     author = book.author,
                     imageUrl = book.imageUrl,
                     status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
-                    onClick = { /* Admin might not need a click action here */ }
+                    category = book.category, // Teruskan kategori
+                    onClick = { /* Admin mungkin tidak butuh aksi klik di sini */ }
                 )
             }
 
