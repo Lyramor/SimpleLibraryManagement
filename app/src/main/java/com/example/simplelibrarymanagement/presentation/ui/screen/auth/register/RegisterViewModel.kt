@@ -2,8 +2,9 @@ package com.example.simplelibrarymanagement.presentation.ui.screen.auth.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplelibrarymanagement.data.model.RegisterRequest
+import com.example.simplelibrarymanagement.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,8 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    // Inject your authentication repository here if you have one
-    // private val authRepository: AuthRepository
+    // Inject the AuthRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -53,9 +54,11 @@ class RegisterViewModel @Inject constructor(
         )
     }
 
+// In RegisterViewModel.kt, replace the entire register() function with this:
+
     fun register() {
         val currentState = _uiState.value
-
+        // Validation logic remains the same...
         val usernameError = validateUsername(currentState.username)
         val emailError = validateEmail(currentState.email)
         val passwordError = validatePassword(currentState.password)
@@ -73,31 +76,37 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.value = currentState.copy(isLoading = true, errorMessage = null)
-            try {
-                // Simulate API call
-                delay(2000)
 
-                // Mock registration logic - replace with your actual backend call
-                if (currentState.username == "taken") { // Contoh validasi sederhana
-                    _uiState.value = currentState.copy(
-                        isLoading = false,
-                        errorMessage = "Username already taken."
-                    )
-                } else {
-                    _uiState.value = currentState.copy(
+            // --- THIS IS THE FIX ---
+            // Create the RegisterRequest with the corrected fields
+            val registerRequest = RegisterRequest(
+                name = currentState.username, // Use the value from the UI
+                email = currentState.email,
+                password = currentState.password,
+                roleId = 2 // Assuming '2' is the ID for the "User" role
+            )
+            // -------------------------
+
+            val result = authRepository.register(registerRequest)
+
+            result.fold(
+                onSuccess = {
+                    _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isRegistrationSuccess = true
                     )
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Registration failed: ${error.message}"
+                    )
                 }
-            } catch (e: Exception) {
-                _uiState.value = currentState.copy(
-                    isLoading = false,
-                    errorMessage = "Registration failed: ${e.message}"
-                )
-            }
+            )
         }
     }
 
+    // --- Validation functions remain the same ---
     private fun validateUsername(username: String): String? {
         return when {
             username.isBlank() -> "Username is required"

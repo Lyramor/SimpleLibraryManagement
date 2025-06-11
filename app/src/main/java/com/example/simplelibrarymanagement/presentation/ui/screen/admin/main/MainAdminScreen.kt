@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,12 +18,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.simplelibrarymanagement.R
 import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavItem
 import com.example.simplelibrarymanagement.presentation.ui.component.AdminBottomNavigationBar
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.managebook.ManageBookScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.managecategory.ManageCategoryScreen
+// --- THIS IS THE FIX ---
 import com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser.ManageUserScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,11 +32,10 @@ import com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageus
 fun MainAdminScreen(rootNavController: NavController) {
     val adminNavController = rememberNavController()
 
-    // DIUBAH: Menambahkan item navigasi kategori
     val adminNavItems = listOf(
         AdminBottomNavItem.Dashboard,
         AdminBottomNavItem.ManageBooks,
-        AdminBottomNavItem.ManageCategories, // Ditambahkan
+        AdminBottomNavItem.ManageCategories,
         AdminBottomNavItem.ManageUsers
     )
 
@@ -67,7 +64,6 @@ fun MainAdminScreen(rootNavController: NavController) {
             composable(Screen.AdminManageBooks.route) {
                 ManageBookScreen()
             }
-            // BARU: Menambahkan composable untuk layar kategori
             composable(Screen.AdminManageCategory.route) {
                 ManageCategoryScreen()
             }
@@ -78,7 +74,7 @@ fun MainAdminScreen(rootNavController: NavController) {
     }
 }
 
-// Placeholder untuk Dashboard Screen
+// Placeholder for Dashboard Screen
 @Composable
 fun AdminDashboardScreen(navController: NavController) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

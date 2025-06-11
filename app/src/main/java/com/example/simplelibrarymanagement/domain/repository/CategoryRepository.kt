@@ -3,12 +3,13 @@ package com.example.simplelibrarymanagement.domain.repository
 import com.example.simplelibrarymanagement.domain.model.Category
 
 /**
- * Interface untuk mendefinisikan kontrak bagaimana cara mendapatkan data kategori.
- * ViewModel akan berinteraksi dengan interface ini, bukan dengan implementasi langsungnya.
+ * Interface for how to get category data.
  */
 interface CategoryRepository {
-    /**
-     * Mengambil daftar semua kategori dari sumber data.
-     */
     suspend fun getAllCategories(): List<Category>
+
+    // Add the new function definitions
+    suspend fun addCategory(category: Category)
+    suspend fun updateCategory(category: Category)
+    suspend fun deleteCategory(categoryId: Int)
 }

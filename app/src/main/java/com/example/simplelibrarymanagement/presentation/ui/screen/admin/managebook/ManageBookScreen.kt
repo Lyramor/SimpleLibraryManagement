@@ -52,11 +52,9 @@ fun ManageBookScreen(
                 uiState.isLoading -> BookListSkeleton()
                 uiState.errorMessage != null -> NetworkErrorMessage(message = uiState.errorMessage!!)
                 uiState.books.isEmpty() && uiState.searchQuery.isNotBlank() -> {
-                    // State ketika pencarian tidak menemukan hasil
                     EmptyState(title = "Not Found", description = "No books match your search query.")
                 }
                 uiState.books.isEmpty() -> {
-                    // State ketika tidak ada buku sama sekali
                     EmptyState(title = "No Books", description = "There are no books in the library yet.")
                 }
                 else -> {
@@ -77,10 +75,9 @@ fun ManageBookScreen(
     }
 
     if (uiState.showDialog) {
-        // DIUBAH: Meneruskan daftar kategori ke dialog
         DialogManageBook(
             book = uiState.selectedBook,
-            categories = uiState.categories, // Teruskan daftar kategori
+            categories = uiState.categories,
             onDismiss = viewModel::onDialogDismiss,
             onConfirm = viewModel::onBookSave
         )
@@ -103,8 +100,11 @@ fun AdminCardBook(
                     author = book.author,
                     imageUrl = book.imageUrl,
                     status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
-                    category = book.category, // Teruskan kategori
-                    onClick = { /* Admin mungkin tidak butuh aksi klik di sini */ }
+                    category = book.category,
+                    onClick = { /* Admin mungkin tidak butuh aksi klik di sini */ },
+                    // --- THIS IS THE FIX ---
+                    // Add the missing parameter with an empty action
+                    onCategoryClick = { }
                 )
             }
 

@@ -1,9 +1,10 @@
-package com.example.simplelibrarymanagement.presentation.ui.screen.admin.manageuser
+package com.example.simplelibrarymanagement.presentation.ui.screen.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.simplelibrarymanagement.domain.model.User
-import com.example.simplelibrarymanagement.domain.repository.UserRepository
+import com.example.simplelibrarymanagement.data.model.LoginRequest
+import com.example.simplelibrarymanagement.data.remote.AuthTokenManager
+import com.example.simplelibrarymanagement.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,94 +13,67 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ManageUserViewModel @Inject constructor(
-    private val userRepository: UserRepository // DIUBAH: Inject repositori asli
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    // --- THIS IS THE FIX ---
+    private val tokenManager: AuthTokenManager // Add tokenManager to the constructor
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ManageUserUiState())
-    val uiState: StateFlow<ManageUserUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    init {
-        loadUsers()
+    fun updateEmail(email: String) {
+        _uiState.value = _uiState.value.copy(email = email, emailError = null)
     }
 
-    fun loadUsers() {
+    fun updatePassword(password: String) {
+        _uiState.value = _uiState.value.copy(password = password, passwordError = null)
+    }
+
+    fun login() {
+        if (_uiState.value.email.isBlank()) {
+            _uiState.value = _uiState.value.copy(emailError = "Email cannot be empty")
+            return
+        }
+        if (_uiState.value.password.isBlank()) {
+            _uiState.value = _uiState.value.copy(passwordError = "Password cannot be empty")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            try {
-                val users = userRepository.getUsers()
-                _uiState.value = _uiState.value.copy(isLoading = false, users = users)
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Failed to load users."
-                )
-            }
-        }
-    }
 
-    fun onSearchQueryChanged(query: String) {
-        // Implementasi pencarian di sisi klien (untuk saat ini)
-        // Anda dapat memperbaikinya nanti untuk melakukan pencarian di sisi server via API
-        viewModelScope.launch {
-            val allUsers = userRepository.getUsers()
-            val filteredUsers = allUsers.filter {
-                it.name.contains(query, ignoreCase = true) || it.email.contains(query, ignoreCase = true)
-            }
-            _uiState.value = _uiState.value.copy(searchQuery = query, users = filteredUsers)
-        }
-    }
+            val loginRequest = LoginRequest(
+                email = _uiState.value.email,
+                password = _uiState.value.password
+            )
 
-    // --- Logika untuk dialog tambah/edit ---
-    fun onAddNewUserClick() {
-        _uiState.value = _uiState.value.copy(showUserDialog = true, userToEdit = null)
-    }
+            val result = authRepository.login(loginRequest)
 
-    fun onEditUserClick(user: User) {
-        _uiState.value = _uiState.value.copy(showUserDialog = true, userToEdit = user)
-    }
-
-    fun onUserDialogDismiss() {
-        _uiState.value = _uiState.value.copy(showUserDialog = false, userToEdit = null)
-    }
-
-    fun onUserSave(user: User) {
-        viewModelScope.launch {
-            try {
-                if (_uiState.value.userToEdit == null) {
-                    userRepository.addUser(user)
-                } else {
-                    userRepository.updateUser(user)
+            result.fold(
+                onSuccess = { response ->
+                    // Now tokenManager is available to use
+                    tokenManager.saveToken(response.accessToken, response.userId)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isLoginSuccess = true
+                    )
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Login failed: ${error.message}"
+                    )
                 }
-                onUserDialogDismiss()
-                loadUsers()
-            } catch(e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Failed to save user.")
-            }
+            )
         }
     }
 
-    // --- Logika untuk dialog hapus ---
-    fun onUserDeleteRequest(user: User) {
-        _uiState.value = _uiState.value.copy(userToDelete = user)
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
-    fun onConfirmUserDelete() {
-        viewModelScope.launch {
-            val user = _uiState.value.userToDelete
-            user?.let {
-                try {
-                    userRepository.deleteUser(it.id)
-                    _uiState.value = _uiState.value.copy(userToDelete = null)
-                    loadUsers()
-                } catch(e: Exception) {
-                    _uiState.value = _uiState.value.copy(errorMessage = "Failed to delete user.")
-                }
-            }
-        }
-    }
-
-    fun onDismissDeleteDialog() {
-        _uiState.value = _uiState.value.copy(userToDelete = null)
+    fun resetLoginSuccess() {
+        _uiState.value = _uiState.value.copy(isLoginSuccess = false)
     }
 }

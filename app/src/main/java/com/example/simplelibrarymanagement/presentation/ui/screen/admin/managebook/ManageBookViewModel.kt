@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplelibrarymanagement.domain.model.Book
 import com.example.simplelibrarymanagement.domain.repository.BookRepository
-import com.example.simplelibrarymanagement.domain.repository.CategoryRepository // DIASUMSIKAN ADA
+import com.example.simplelibrarymanagement.domain.repository.CategoryRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,23 +22,20 @@ class ManageBookViewModel @Inject constructor(
     val uiState: StateFlow<ManageBookUiState> = _uiState.asStateFlow()
 
     init {
-        // Mengambil data awal (buku dan kategori) saat ViewModel dibuat
         loadInitialData()
     }
 
-    // DIUBAH: Mengambil buku dan kategori secara bersamaan
     fun loadInitialData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                // Mengambil data dari kedua repositori
                 val books = bookRepository.getAllBooks()
-                val categories = categoryRepository.getAllCategories() // Memanggil fungsi dari repo kategori
+                val categories = categoryRepository.getAllCategories()
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     books = books,
-                    categories = categories // Menyimpan daftar kategori ke state
+                    categories = categories
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -71,31 +68,29 @@ class ManageBookViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(showDialog = false, selectedBook = null)
     }
 
-    // DIUBAH: Logika menyimpan buku menjadi lebih jelas
     fun onBookSave(book: Book) {
         viewModelScope.launch {
             try {
-                // Membedakan antara menambah buku baru atau mengedit
                 if (_uiState.value.selectedBook == null) {
-                    // Logika untuk menambah buku baru
                     bookRepository.addBook(book)
                 } else {
-                    // Logika untuk mengedit buku yang sudah ada
                     bookRepository.updateBook(book)
                 }
                 onDialogDismiss()
-                loadInitialData() // Muat ulang data untuk menampilkan perubahan
+                loadInitialData()
             } catch(e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Failed to save book.")
             }
         }
     }
 
-    fun onDeleteBook(bookId: String) {
+    // --- THIS IS THE FIX ---
+    // Change bookId from String to Int
+    fun onDeleteBook(bookId: Int) {
         viewModelScope.launch {
             try {
                 bookRepository.deleteBook(bookId)
-                loadInitialData() // Muat ulang data
+                loadInitialData()
             } catch(e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Failed to delete book.")
             }

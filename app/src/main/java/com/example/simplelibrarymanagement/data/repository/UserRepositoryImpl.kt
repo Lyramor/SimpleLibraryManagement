@@ -47,4 +47,13 @@ class UserRepositoryImpl @Inject constructor(
         // Nantinya: apiService.deleteUser(userId)
         userList.removeAll { it.id == userId }
     }
+    override suspend fun getUserById(userId: String): User? {
+        return try {
+            apiService.getUserById(userId)
+        } catch (e: Exception) {
+            // If the user is not found or another error occurs, return null.
+            e.printStackTrace()
+            null
+        }
+    }
 }

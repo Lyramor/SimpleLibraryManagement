@@ -10,13 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.simplelibrarymanagement.domain.model.Book
-import com.example.simplelibrarymanagement.domain.model.Category // DIASUMSIKAN ADA
+import com.example.simplelibrarymanagement.domain.model.Category
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogManageBook(
     book: Book?, // Null jika menambah buku baru
-    categories: List<Category>, // BARU: Daftar kategori untuk dropdown
+    categories: List<Category>,
     onDismiss: () -> Unit,
     onConfirm: (Book) -> Unit
 ) {
@@ -24,11 +24,10 @@ fun DialogManageBook(
     var author by remember { mutableStateOf(book?.author ?: "") }
     var description by remember { mutableStateOf(book?.description ?: "") }
     var imageUrl by remember { mutableStateOf(book?.imageUrl ?: "") }
-    var year by remember { mutableStateOf(book?.year?.toString() ?: "") } // BARU
+    var year by remember { mutableStateOf(book?.year?.toString() ?: "") }
 
-    // State untuk dropdown kategori
-    var isCategoryExpanded by remember { mutableStateOf(false) } // BARU
-    var selectedCategory by remember { mutableStateOf(book?.category) } // BARU
+    var isCategoryExpanded by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf(book?.category) }
 
     val isFormValid = title.isNotBlank() && author.isNotBlank() && description.isNotBlank() && year.isNotBlank() && selectedCategory != null
 
@@ -38,7 +37,7 @@ fun DialogManageBook(
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp) // Beri jarak lebih
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedTextField(
                     value = title,
@@ -52,7 +51,6 @@ fun DialogManageBook(
                     label = { Text("Author") },
                     isError = author.isBlank()
                 )
-                // BARU: Input untuk Tahun
                 OutlinedTextField(
                     value = year,
                     onValueChange = { if (it.all { char -> char.isDigit() }) year = it },
@@ -61,7 +59,6 @@ fun DialogManageBook(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
-                // BARU: Dropdown untuk Kategori
                 ExposedDropdownMenuBox(
                     expanded = isCategoryExpanded,
                     onExpandedChange = { isCategoryExpanded = !isCategoryExpanded }
@@ -111,14 +108,16 @@ fun DialogManageBook(
             Button(
                 onClick = {
                     val newBook = Book(
+                        // --- THIS IS THE FIX ---
+                        // Use the existing ID if editing, or a temporary String ID for a new book.
                         id = book?.id ?: System.currentTimeMillis().toString(),
                         title = title,
                         author = author,
-                        year = year.toIntOrNull(), // DIUBAH
+                        year = year.toIntOrNull(),
                         description = description,
                         imageUrl = imageUrl,
                         isAvailable = book?.isAvailable ?: true,
-                        category = selectedCategory // DIUBAH
+                        category = selectedCategory
                     )
                     onConfirm(newBook)
                 },

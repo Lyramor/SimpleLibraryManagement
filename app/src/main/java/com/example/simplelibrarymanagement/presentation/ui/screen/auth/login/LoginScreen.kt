@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +37,6 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
 
-    // Handle UI State Changes for navigation
     LaunchedEffect(uiState.isLoginSuccess) {
         if (uiState.isLoginSuccess) {
             onLoginSuccess()
@@ -46,7 +44,6 @@ fun LoginScreen(
         }
     }
 
-    // Show error message if any
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
             snackbarHostState.showSnackbar(
@@ -85,7 +82,6 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(40.dp))
 
-            // App Logo and Title
             Row(
                 verticalAlignment = Alignment.Top,
                 modifier = Modifier.padding(bottom = 40.dp)
@@ -109,17 +105,16 @@ fun LoginScreen(
                 )
             }
 
-            // Login Form
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Username Field
+                // --- EMAIL FIELD (Updated from Username) ---
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Username",
+                        text = "Email", // Changed label
                         style = MaterialTheme.libraryTypography.FormLabel.copy(
                             fontSize = 16.sp
                         ),
@@ -127,8 +122,8 @@ fun LoginScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     OutlinedTextField(
-                        value = uiState.username,
-                        onValueChange = viewModel::updateUsername,
+                        value = uiState.email, // Changed state value
+                        onValueChange = viewModel::updateEmail, // Changed handler
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -144,19 +139,21 @@ fun LoginScreen(
                         ),
                         shape = MaterialTheme.libraryShapes.InputField,
                         singleLine = true,
-                        isError = uiState.usernameError != null
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), // Changed keyboard type
+                        isError = uiState.emailError != null // Changed error state
                     )
-                    if (uiState.usernameError != null) {
+                    if (uiState.emailError != null) { // Changed error state
                         Text(
-                            text = uiState.usernameError!!,
+                            text = uiState.emailError!!,
                             style = MaterialTheme.libraryTypography.ErrorText,
                             color = Error,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }
+                // ------------------------------------
 
-                // Password Field
+                // Password Field (remains the same)
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -200,7 +197,6 @@ fun LoginScreen(
                     }
                 }
 
-                // Forgot Password - Updated dengan navigasi
                 Text(
                     text = "Forgot your password?",
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -213,7 +209,6 @@ fun LoginScreen(
                         .padding(top = 4.dp, bottom = 8.dp)
                 )
 
-                // Login Button
                 Button(
                     onClick = {
                         viewModel.login()
@@ -245,7 +240,6 @@ fun LoginScreen(
                     }
                 }
 
-                // "Don't have an account? Sign up" Row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -270,7 +264,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Bottom indicator line
             Box(
                 modifier = Modifier
                     .width(140.dp)
@@ -282,13 +275,5 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    SimpleLibraryManagementTheme {
-        LoginScreen()
     }
 }

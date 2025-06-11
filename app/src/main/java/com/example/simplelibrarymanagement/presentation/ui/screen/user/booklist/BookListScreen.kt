@@ -54,9 +54,19 @@ fun BookListScreen(
                         author = book.author,
                         imageUrl = book.imageUrl,
                         status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
-                        category = book.category, // DIUBAH: Teruskan informasi kategori
+                        category = book.category,
                         onClick = {
                             navController.navigate(Screen.UserBookDetail.createRoute(book.id))
+                        },
+                        // --- THIS IS THE FIX ---
+                        // Add the missing parameter with the correct navigation logic
+                        onCategoryClick = { category ->
+                            // Check if category is not null before navigating
+                            category.let {
+                                navController.navigate(
+                                    Screen.UserBookByCategory.createRoute(it.id, it.name)
+                                )
+                            }
                         }
                     )
                 }

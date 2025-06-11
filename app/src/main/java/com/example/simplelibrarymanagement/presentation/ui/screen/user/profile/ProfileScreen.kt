@@ -6,101 +6,118 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.simplelibrarymanagement.presentation.ui.theme.libraryColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onNavigateToAuth: () -> Unit,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Handle logout navigation
-    LaunchedEffect(uiState.isLogoutDialogVisible) {
-        // Navigation akan ditangani melalui aksi pada dialog
+    // This effect will show the snackbar whenever the errorMessage is not null
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearErrorMessage()
+        }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    // This effect will close the dialog when a profile update is successful
+    LaunchedEffect(uiState.updateProfileSuccess) {
+        if (uiState.updateProfileSuccess) {
+            viewModel.hideEditProfileDialog()
+        }
+    }
+
+    // Use Scaffold to properly place the SnackbarHost
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            item {
-                ProfileHeader(
-                    userProfile = uiState.userProfile,
-                    onEditProfile = viewModel::showEditProfileDialog
-                )
-            }
-
-            item {
-                StatsSection(userProfile = uiState.userProfile)
-            }
-
-            item {
-                Text(
-                    text = "Buku yang Sedang Dipinjam",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            if (uiState.borrowedBooks.isEmpty()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 item {
-                    EmptyStateCard(
-                        message = "Tidak ada buku yang sedang dipinjam",
-                        icon = Icons.Default.MenuBook
+                    ProfileHeader(
+                        userProfile = uiState.userProfile,
+                        onEditProfile = viewModel::showEditProfileDialog
                     )
                 }
-            } else {
-                items(uiState.borrowedBooks) { borrowedBook ->
-                    BorrowedBookCard(borrowedBook = borrowedBook)
+                item {
+                    StatsSection(userProfile = uiState.userProfile)
+                }
+                item {
+                    Text(
+                        text = "Buku yang Sedang Dipinjam",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                if (uiState.borrowedBooks.isEmpty()) {
+                    item {
+                        EmptyStateCard(
+                            message = "Tidak ada buku yang sedang dipinjam",
+                            icon = Icons.Default.MenuBook
+                        )
+                    }
+                } else {
+                    items(uiState.borrowedBooks) { borrowedBook ->
+                        BorrowedBookCard(borrowedBook = borrowedBook)
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Pengaturan",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                item {
+                    SettingsSection(
+                        onLogout = viewModel::showLogoutDialog,
+                        onRefresh = viewModel::refreshProfile
+                    )
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Pengaturan",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            item {
-                SettingsSection(
-                    onLogout = viewModel::showLogoutDialog,
-                    onRefresh = viewModel::refreshProfile
-                )
-            }
-        }
-
-        // Loading overlay
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            // Show a loading overlay only when the initial profile is being loaded
+            if (uiState.isLoading && uiState.userProfile == null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
     }
 
-    // Dialogs
+    // --- Dialogs remain outside the Scaffold ---
     if (uiState.isLogoutDialogVisible) {
         LogoutDialog(
             onConfirm = {
@@ -119,23 +136,8 @@ fun ProfileScreen(
             onDismiss = viewModel::hideEditProfileDialog
         )
     }
-
-    // Show error message
-    uiState.errorMessage?.let { message ->
-        LaunchedEffect(message) {
-            // Anda bisa menampilkan Snackbar di sini jika mau
-            viewModel.clearErrorMessage()
-        }
-    }
-
-    // Show success message
-    if (uiState.updateProfileSuccess) {
-        LaunchedEffect(uiState.updateProfileSuccess) {
-            // Anda bisa menampilkan Snackbar sukses di sini jika mau
-            viewModel.hideEditProfileDialog()
-        }
-    }
 }
+
 
 @Composable
 private fun ProfileHeader(
@@ -167,18 +169,18 @@ private fun ProfileHeader(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            userProfile?.let { profile ->
+            if (userProfile != null) {
                 Text(
-                    text = profile.name,
+                    text = userProfile.name,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = profile.email,
+                    text = userProfile.email,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                profile.phoneNumber?.let { phone ->
+                userProfile.phoneNumber?.let { phone ->
                     Text(
                         text = phone,
                         style = MaterialTheme.typography.bodySmall,
@@ -187,7 +189,7 @@ private fun ProfileHeader(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Bergabung sejak ${profile.joinDate}",
+                    text = "Bergabung sejak ${userProfile.joinDate}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -204,6 +206,12 @@ private fun ProfileHeader(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Edit Profil")
                 }
+            } else {
+                // Show skeleton loaders if userProfile is null
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(modifier = Modifier.height(28.dp).fillMaxWidth(0.6f).background(MaterialTheme.colorScheme.surfaceVariant))
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(modifier = Modifier.height(20.dp).fillMaxWidth(0.8f).background(MaterialTheme.colorScheme.surfaceVariant))
             }
         }
     }
@@ -211,7 +219,7 @@ private fun ProfileHeader(
 
 @Composable
 private fun StatsSection(userProfile: UserProfile?) {
-    userProfile?.let { profile ->
+    if (userProfile != null) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -223,17 +231,17 @@ private fun StatsSection(userProfile: UserProfile?) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 StatItem(
-                    value = profile.totalBorrowedBooks.toString(),
+                    value = userProfile.totalBorrowedBooks.toString(),
                     label = "Total Pinjam",
                     color = MaterialTheme.colorScheme.primary
                 )
                 StatItem(
-                    value = profile.activeBorrowedBooks.toString(),
+                    value = userProfile.activeBorrowedBooks.toString(),
                     label = "Sedang Pinjam",
                     color = MaterialTheme.libraryColors.borrowed
                 )
                 StatItem(
-                    value = profile.overdueBooks.toString(),
+                    value = userProfile.overdueBooks.toString(),
                     label = "Terlambat",
                     color = MaterialTheme.libraryColors.overdue
                 )
@@ -246,7 +254,7 @@ private fun StatsSection(userProfile: UserProfile?) {
 private fun StatItem(
     value: String,
     label: String,
-    color: androidx.compose.ui.graphics.Color
+    color: Color
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -358,7 +366,7 @@ private fun SettingsSection(
                 onClick = onRefresh
             )
             SettingsItem(
-                icon = Icons.Default.ExitToApp,
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
                 title = "Logout",
                 onClick = onLogout,
                 isDestructive = true
@@ -461,6 +469,15 @@ private fun EditProfileDialog(
     var name by remember { mutableStateOf(userProfile?.name ?: "") }
     var phoneNumber by remember { mutableStateOf(userProfile?.phoneNumber ?: "") }
     var address by remember { mutableStateOf(userProfile?.address ?: "") }
+
+    // Update state when userProfile changes
+    LaunchedEffect(userProfile) {
+        if (userProfile != null) {
+            name = userProfile.name
+            phoneNumber = userProfile.phoneNumber ?: ""
+            address = userProfile.address ?: ""
+        }
+    }
 
     AlertDialog(
         onDismissRequest = { if (!isLoading) onDismiss() },

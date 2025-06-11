@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.simplelibrarymanagement.domain.model.Book
+import com.example.simplelibrarymanagement.domain.model.Category
 import com.example.simplelibrarymanagement.presentation.ui.component.*
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 
@@ -67,6 +68,11 @@ fun HomeScreen(
                         books = uiState.featuredBooks,
                         onBookClick = { bookId ->
                             navController.navigate(Screen.UserBookDetail.createRoute(bookId))
+                        },
+                        onCategoryClick = { category ->
+                            navController.navigate(
+                                Screen.UserBookByCategory.createRoute(category.id, category.name)
+                            )
                         }
                     )
                 }
@@ -77,6 +83,11 @@ fun HomeScreen(
                         books = uiState.newArrivals,
                         onBookClick = { bookId ->
                             navController.navigate(Screen.UserBookDetail.createRoute(bookId))
+                        },
+                        onCategoryClick = { category ->
+                            navController.navigate(
+                                Screen.UserBookByCategory.createRoute(category.id, category.name)
+                            )
                         }
                     )
                 }
@@ -89,7 +100,8 @@ fun HomeScreen(
 private fun BookCarouselSection(
     title: String,
     books: List<Book>,
-    onBookClick: (String) -> Unit
+    onBookClick: (Int) -> Unit,
+    onCategoryClick: (Category) -> Unit
 ) {
     Column {
         Text(
@@ -112,8 +124,9 @@ private fun BookCarouselSection(
                         author = book.author,
                         imageUrl = book.imageUrl,
                         status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
-                        category = book.category, // DIUBAH: Teruskan informasi kategori
+                        category = book.category,
                         onClick = { onBookClick(book.id) },
+                        onCategoryClick = onCategoryClick,
                         modifier = Modifier.width(280.dp)
                     )
                 }

@@ -2,13 +2,22 @@ package com.example.simplelibrarymanagement.presentation.ui.screen.user.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplelibrarymanagement.data.remote.AuthTokenManager
+import com.example.simplelibrarymanagement.domain.repository.BorrowRepository
+import com.example.simplelibrarymanagement.domain.repository.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
+import javax.inject.Inject
 
-class ProfileViewModel : ViewModel() {
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val borrowRepository: BorrowRepository,
+    private val tokenManager: AuthTokenManager
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -17,129 +26,81 @@ class ProfileViewModel : ViewModel() {
         loadProfileData()
     }
 
-    /**
-     * Memuat data profil pengguna
-     */
     fun loadProfileData() {
+        // This line causes the error if tokenManager.userId doesn't exist
+        val currentUserId = tokenManager.userId
+        if (currentUserId == null) {
+            _uiState.value = _uiState.value.copy(errorMessage = "User not logged in.")
+            return
+        }
+
+        // ... The rest of the function ...
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-
             try {
-                // Simulasi API call
-                delay(1000)
+                val user = userRepository.getUserById(currentUserId)
+                val allBorrows = borrowRepository.getAllBorrows()
 
-                // Mock data - dalam implementasi sebenarnya, ambil dari repository
-                val userProfile = UserProfile(
-                    id = "user_001",
-                    name = "John Doe",
-                    email = "john.doe@example.com",
-                    phoneNumber = "+62 812-3456-7890",
-                    address = "Jl. Contoh No. 123, Jakarta",
-                    joinDate = "15 Januari 2023",
-                    totalBorrowedBooks = 25,
-                    activeBorrowedBooks = 3,
-                    overdueBooks = 1
-                )
+                if (user != null) {
+                    val userBorrows = allBorrows.filter { it.userId == currentUserId }
+                    val totalBorrowed = userBorrows.size
+                    val currentlyBorrowed = userBorrows.count { it.returnDate == null }
+                    val overdue = userBorrows.count { it.status == "OVERDUE" && it.returnDate == null }
+                    val borrowedBookList = userBorrows
+                        .filter { it.returnDate == null }
+                        .map { borrowRecord ->
+                            BorrowedBook(
+                                id = borrowRecord.id,
+                                bookId = borrowRecord.bookId,
+                                bookTitle = "Book ID: ${borrowRecord.bookId}",
+                                bookAuthor = "Author details needed",
+                                bookCoverUrl = null,
+                                borrowDate = borrowRecord.loanDate,
+                                dueDate = borrowRecord.dueDate,
+                                categoryName = "Category needed",
+                                isOverdue = borrowRecord.status == "OVERDUE"
+                            )
+                        }
 
-                val borrowedBooks = listOf(
-                    BorrowedBook(
-                        id = "borrow_001",
-                        bookId = "book_001",
-                        bookTitle = "The Great Gatsby",
-                        bookAuthor = "F. Scott Fitzgerald",
-                        bookCoverUrl = null,
-                        borrowDate = "01 Juni 2024",
-                        dueDate = "15 Juni 2024",
-                        isOverdue = true
-                    ),
-                    BorrowedBook(
-                        id = "borrow_002",
-                        bookId = "book_002",
-                        bookTitle = "To Kill a Mockingbird",
-                        bookAuthor = "Harper Lee",
-                        bookCoverUrl = null,
-                        borrowDate = "05 Juni 2024",
-                        dueDate = "19 Juni 2024",
-                        isOverdue = false
-                    ),
-                    BorrowedBook(
-                        id = "borrow_003",
-                        bookId = "book_003",
-                        bookTitle = "1984",
-                        bookAuthor = "George Orwell",
-                        bookCoverUrl = null,
-                        borrowDate = "10 Juni 2024",
-                        dueDate = "24 Juni 2024",
-                        isOverdue = false
+                    val userProfile = UserProfile(
+                        id = user.id,
+                        name = user.name,
+                        email = user.email,
+                        phoneNumber = "+62 812-3456-7890",
+                        address = "Jl. Contoh No. 123, Jakarta",
+                        joinDate = "15 Januari 2023",
+                        totalBorrowedBooks = totalBorrowed,
+                        activeBorrowedBooks = currentlyBorrowed,
+                        overdueBooks = overdue
                     )
-                )
 
-                val borrowHistory = listOf(
-                    BorrowHistory(
-                        id = "history_001",
-                        bookId = "book_004",
-                        bookTitle = "Pride and Prejudice",
-                        bookAuthor = "Jane Austen",
-                        borrowDate = "01 Mei 2024",
-                        returnDate = "14 Mei 2024",
-                        dueDate = "15 Mei 2024",
-                        status = BorrowStatus.RETURNED
-                    ),
-                    BorrowHistory(
-                        id = "history_002",
-                        bookId = "book_005",
-                        bookTitle = "The Catcher in the Rye",
-                        bookAuthor = "J.D. Salinger",
-                        borrowDate = "15 April 2024",
-                        returnDate = "20 April 2024",
-                        dueDate = "29 April 2024",
-                        status = BorrowStatus.RETURNED_LATE
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        userProfile = userProfile,
+                        borrowedBooks = borrowedBookList
                     )
-                )
-
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    userProfile = userProfile,
-                    borrowedBooks = borrowedBooks,
-                    borrowHistory = borrowHistory
-                )
+                } else {
+                    _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Failed to load profile.")
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = "Gagal memuat data profil: ${e.message}"
-                )
+                _uiState.value = _uiState.value.copy(isLoading = false, errorMessage = "Error: ${e.message}")
             }
         }
     }
 
-    /**
-     * Menampilkan dialog logout
-     */
     fun showLogoutDialog() {
         _uiState.value = _uiState.value.copy(isLogoutDialogVisible = true)
     }
 
-    /**
-     * Menyembunyikan dialog logout
-     */
     fun hideLogoutDialog() {
         _uiState.value = _uiState.value.copy(isLogoutDialogVisible = false)
     }
 
-    /**
-     * Melakukan logout
-     */
     fun logout() {
         viewModelScope.launch {
             try {
-                // Simulasi proses logout
-                delay(500)
-
-                // Dalam implementasi sebenarnya, hapus token dan data pengguna
-                // authRepository.logout()
-
+                tokenManager.clearToken()
                 hideLogoutDialog()
-                // Navigate to auth screen - akan ditangani di UI
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     errorMessage = "Gagal logout: ${e.message}",
@@ -149,16 +110,10 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Menampilkan dialog edit profil
-     */
     fun showEditProfileDialog() {
         _uiState.value = _uiState.value.copy(isEditProfileDialogVisible = true)
     }
 
-    /**
-     * Menyembunyikan dialog edit profil
-     */
     fun hideEditProfileDialog() {
         _uiState.value = _uiState.value.copy(
             isEditProfileDialogVisible = false,
@@ -166,50 +121,26 @@ class ProfileViewModel : ViewModel() {
         )
     }
 
-    /**
-     * Memperbarui profil pengguna
-     */
     fun updateProfile(name: String, phoneNumber: String, address: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isUpdatingProfile = true)
-
-            try {
-                // Simulasi API call
-                delay(1000)
-
-                val currentProfile = _uiState.value.userProfile
-                if (currentProfile != null) {
-                    val updatedProfile = currentProfile.copy(
-                        name = name,
-                        phoneNumber = phoneNumber,
-                        address = address
-                    )
-
-                    _uiState.value = _uiState.value.copy(
-                        userProfile = updatedProfile,
-                        isUpdatingProfile = false,
-                        updateProfileSuccess = true
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isUpdatingProfile = false,
-                    errorMessage = "Gagal memperbarui profil: ${e.message}"
-                )
-            }
+            val updatedProfile = _uiState.value.userProfile?.copy(
+                name = name,
+                phoneNumber = phoneNumber,
+                address = address
+            )
+            _uiState.value = _uiState.value.copy(
+                userProfile = updatedProfile,
+                isUpdatingProfile = false,
+                updateProfileSuccess = true
+            )
         }
     }
 
-    /**
-     * Menghapus pesan error
-     */
     fun clearErrorMessage() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
-    /**
-     * Refresh data profil
-     */
     fun refreshProfile() {
         loadProfileData()
     }

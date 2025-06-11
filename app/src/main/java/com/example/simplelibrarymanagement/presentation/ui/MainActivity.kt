@@ -15,6 +15,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
+// --- Add missing imports ---
+import com.example.simplelibrarymanagement.presentation.ui.screen.user.bookdetail.BookDetailScreen
+import com.example.simplelibrarymanagement.presentation.ui.screen.user.main.MainUserScreen
+// -------------------------
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.AuthScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.forgotpassword.ForgotPasswordScreen
@@ -48,22 +53,78 @@ fun LibraryApp() {
 
         NavHost(
             navController = navController,
-            startDestination = Screen.Auth.route
+            startDestination = Screen.AuthGraph.route
         ) {
-            // ... (composable untuk Auth, Login, Register, dll. tetap sama)
-
-            // BARU: Menambahkan composable untuk halaman Book By Category
-            composable(
-                route = Screen.UserBookByCategory.route,
-                arguments = listOf(
-                    navArgument("categoryId") { type = NavType.IntType },
-                    navArgument("categoryName") { type = NavType.StringType }
-                )
+            // Authentication Graph
+            navigation(
+                startDestination = Screen.Auth.route,
+                route = Screen.AuthGraph.route
             ) {
-                BookByCategoryScreen(navController = navController)
+                composable(Screen.Auth.route) {
+                    AuthScreen(
+                        onNavigateToLogin = { navController.navigate(Screen.Login.route) },
+                        onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                    )
+                }
+                composable(Screen.Login.route) {
+                    LoginScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToRegister = { navController.navigate(Screen.Register.route) },
+                        onNavigateToForgotPassword = { navController.navigate(Screen.ForgotPassword.route) },
+                        onLoginSuccess = {
+                            navController.navigate(Screen.UserGraph.route) {
+                                popUpTo(Screen.AuthGraph.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    )
+                }
+                composable(Screen.Register.route) {
+                    RegisterScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToLogin = { navController.popBackStack() },
+                        onRegisterSuccess = { navController.popBackStack() }
+                    )
+                }
+                composable(Screen.ForgotPassword.route) {
+                    ForgotPasswordScreen(
+                        onNavigateBack = { navController.popBackStack() },
+                        onResetSuccess = { navController.popBackStack() }
+                    )
+                }
             }
 
-            // ... (composable lain jika ada)
+            // Main User Graph
+            navigation(
+                startDestination = Screen.UserMain.route,
+                route = Screen.UserGraph.route
+            ) {
+                composable(Screen.UserMain.route) {
+                    MainUserScreen(rootNavController = navController)
+                }
+                composable(
+                    route = Screen.UserBookByCategory.route,
+                    arguments = listOf(
+                        navArgument("categoryId") { type = NavType.IntType },
+                        navArgument("categoryName") { type = NavType.StringType }
+                    )
+                ) {
+                    BookByCategoryScreen(navController = navController)
+                }
+
+                // --- THIS IS THE FIX ---
+                // Add the BookDetailScreen as a destination
+                composable(
+                    route = Screen.UserBookDetail.route,
+                    arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+                ) {
+                    BookDetailScreen(
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                // -------------------------
+            }
         }
     }
 }
