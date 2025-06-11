@@ -16,7 +16,7 @@ import com.example.simplelibrarymanagement.presentation.ui.component.DialogManag
 import com.example.simplelibrarymanagement.presentation.ui.component.EmptyState
 import com.example.simplelibrarymanagement.presentation.ui.component.LoadingScreen
 import com.example.simplelibrarymanagement.presentation.ui.component.NetworkErrorMessage
-import com.example.simplelibrarymanagement.presentation.ui.component.SearchTextField // DIUBAH: Menambahkan import ini
+import com.example.simplelibrarymanagement.presentation.ui.component.SearchTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,8 +27,12 @@ fun ManageUserScreen(
 
     Scaffold(
         floatingActionButton = {
-            // DIUBAH: Menghubungkan tombol FAB ke ViewModel
-            FloatingActionButton(onClick = viewModel::onAddNewUserClick) {
+            FloatingActionButton(
+                onClick = viewModel::onAddNewUserClick,
+                // FAB akan menggunakan warna primer (oranye)
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
                 Icon(Icons.Default.Add, contentDescription = "Add User")
             }
         }
@@ -65,7 +69,7 @@ fun ManageUserScreen(
                                 name = user.name,
                                 email = user.email,
                                 role = user.role,
-                                onEditClick = { viewModel.onEditUserClick(user) }, // DIUBAH
+                                onEditClick = { viewModel.onEditUserClick(user) },
                                 onDeleteClick = { viewModel.onUserDeleteRequest(user) }
                             )
                         }
@@ -97,7 +101,6 @@ fun ManageUserScreen(
         )
     }
 
-    // BARU: DIALOG TAMBAH/EDIT PENGGUNA
     if (uiState.showUserDialog) {
         DialogManageUser(
             user = uiState.userToEdit,

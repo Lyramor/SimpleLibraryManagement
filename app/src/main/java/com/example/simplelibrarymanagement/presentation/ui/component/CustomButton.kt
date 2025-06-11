@@ -36,6 +36,7 @@ fun CustomButton(
                     .height(52.dp),
                 enabled = enabled && !isLoading,
                 colors = ButtonDefaults.buttonColors(
+                    // KUNCI: Mengambil warna langsung dari tema
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
@@ -69,6 +70,7 @@ fun CustomButton(
                     .height(52.dp),
                 enabled = enabled && !isLoading,
                 colors = ButtonDefaults.outlinedButtonColors(
+                    // KUNCI: Warna konten juga mengambil dari tema
                     contentColor = MaterialTheme.colorScheme.primary,
                     disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 ),

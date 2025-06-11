@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.simplelibrarymanagement.presentation.ui.theme.*
+import com.example.simplelibrarymanagement.presentation.ui.component.CustomTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,93 +110,30 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // --- EMAIL FIELD (Updated from Username) ---
-                Column(
+                // Email Field using CustomTextField
+                CustomTextField(
+                    value = uiState.email,
+                    onValueChange = viewModel::updateEmail,
+                    label = "Email",
+                    placeholder = "Enter your email",
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    isError = uiState.emailError != null,
+                    errorMessage = uiState.emailError ?: "",
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Email", // Changed label
-                        style = MaterialTheme.libraryTypography.FormLabel.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = uiState.email, // Changed state value
-                        onValueChange = viewModel::updateEmail, // Changed handler
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = InputBorder,
-                            focusedBorderColor = Primary,
-                            unfocusedContainerColor = Color.White,
-                            focusedContainerColor = Color.White,
-                            cursorColor = Primary,
-                            errorBorderColor = Error,
-                            errorLabelColor = Error,
-                            errorCursorColor = Error
-                        ),
-                        shape = MaterialTheme.libraryShapes.InputField,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), // Changed keyboard type
-                        isError = uiState.emailError != null // Changed error state
-                    )
-                    if (uiState.emailError != null) { // Changed error state
-                        Text(
-                            text = uiState.emailError!!,
-                            style = MaterialTheme.libraryTypography.ErrorText,
-                            color = Error,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-                // ------------------------------------
+                )
 
-                // Password Field (remains the same)
-                Column(
+                // Password Field using CustomTextField
+                CustomTextField(
+                    value = uiState.password,
+                    onValueChange = viewModel::updatePassword,
+                    label = "Password",
+                    placeholder = "Enter your password",
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    isError = uiState.passwordError != null,
+                    errorMessage = uiState.passwordError ?: "",
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Password",
-                        style = MaterialTheme.libraryTypography.FormLabel.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = uiState.password,
-                        onValueChange = viewModel::updatePassword,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = InputBorder,
-                            focusedBorderColor = Primary,
-                            unfocusedContainerColor = Color.White,
-                            focusedContainerColor = Color.White,
-                            cursorColor = Primary,
-                            errorBorderColor = Error,
-                            errorLabelColor = Error,
-                            errorCursorColor = Error
-                        ),
-                        shape = MaterialTheme.libraryShapes.InputField,
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        isError = uiState.passwordError != null
-                    )
-                    if (uiState.passwordError != null) {
-                        Text(
-                            text = uiState.passwordError!!,
-                            style = MaterialTheme.libraryTypography.ErrorText,
-                            color = Error,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
+                )
 
                 Text(
                     text = "Forgot your password?",

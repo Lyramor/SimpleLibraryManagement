@@ -2,56 +2,54 @@ package com.example.simplelibrarymanagement.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Primary Colors - Based on the red theme from UI mockup
-val Primary = Color(0xFFFF5757)
-val PrimaryDark = Color(0xFFE04545)
-val PrimaryLight = Color(0xFFFF7979)
+val Primary = Color(0xFFF4511E)
+val PrimaryDark = Color(0xFFD84315)
+val PrimaryLight = Color(0xFFFF7043)
 
-// Secondary Colors
-val Secondary = Color(0xFF6C63FF)
-val SecondaryDark = Color(0xFF5A52E0)
-val SecondaryLight = Color(0xFF8A82FF)
+val Secondary = Color(0xFF455A64)
+val SecondaryDark = Color(0xFF263238)
+val SecondaryLight = Color(0xFF78909C)
 
 // Background Colors
 val Background = Color(0xFFFAFAFA)
 val Surface = Color(0xFFFFFFFF)
-val SurfaceVariant = Color(0xFFF5F5F5)
+val SurfaceVariant = Color(0xFFEEEEEE)
 
 // Text Colors
 val OnPrimary = Color(0xFFFFFFFF)
 val OnSecondary = Color(0xFFFFFFFF)
-val OnBackground = Color(0xFF1A1A1A)
-val OnSurface = Color(0xFF1A1A1A)
-val OnSurfaceVariant = Color(0xFF666666)
+val OnBackground = Color(0xFF212121)
+val OnSurface = Color(0xFF212121)
+val OnSurfaceVariant = Color(0xFF757575)
 
 // Neutral Colors
-val TextPrimary = Color(0xFF1A1A1A)
-val TextSecondary = Color(0xFF666666)
-val TextTertiary = Color(0xFF999999)
+val TextPrimary = Color(0xFF212121)
+val TextSecondary = Color(0xFF757575)
+val TextTertiary = Color(0xFFBDBDBD)
 
 // State Colors
 val Success = Color(0xFF4CAF50)
-val Warning = Color(0xFFFF9800)
-val Error = Color(0xFFFF5757)
-val Info = Color(0xFF2196F3)
+val Warning = Color(0xFFFFC107)
+val Error = Color(0xFFF44336)
+val Info = Color(0xFF03A9F4)
 
 // Border and Divider
 val Border = Color(0xFFE0E0E0)
-val Divider = Color(0xFFEEEEEE)
+val Divider = Color(0xFFE0E0E0)
 
 // Input Field Colors
 val InputBackground = Color(0xFFF5F5F5)
 val InputBorder = Color(0xFFE0E0E0)
-val InputFocused = Color(0xFFFF5757)
+val InputFocused = Primary
 
 // Book Status Colors
 val Available = Color(0xFF4CAF50)
 val Borrowed = Color(0xFFFF9800)
-val Overdue = Color(0xFFFF5757)
+val Overdue = Color(0xFFF44336)
 
-// Category Colors (for different book categories)
+// Category Colors
 val CategoryFiction = Color(0xFF9C27B0)
-val CategoryNonFiction = Color(0xFF2196F3)
+val CategoryNonFiction = Color(0xFF03A9F4)
 val CategoryScience = Color(0xFF4CAF50)
 val CategoryHistory = Color(0xFFFF9800)
 val CategoryBiography = Color(0xFFE91E63)

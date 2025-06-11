@@ -22,7 +22,6 @@ import com.example.simplelibrarymanagement.presentation.ui.screen.user.main.Main
 // -------------------------
 import com.example.simplelibrarymanagement.presentation.ui.navigation.Screen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.AuthScreen
-import com.example.simplelibrarymanagement.presentation.ui.screen.auth.forgotpassword.ForgotPasswordScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.login.LoginScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.auth.register.RegisterScreen
 import com.example.simplelibrarymanagement.presentation.ui.screen.user.bookbycategory.BookByCategoryScreen
@@ -70,7 +69,6 @@ fun LibraryApp() {
                     LoginScreen(
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToRegister = { navController.navigate(Screen.Register.route) },
-                        onNavigateToForgotPassword = { navController.navigate(Screen.ForgotPassword.route) },
                         onLoginSuccess = {
                             navController.navigate(Screen.UserGraph.route) {
                                 popUpTo(Screen.AuthGraph.route) {
@@ -85,12 +83,6 @@ fun LibraryApp() {
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToLogin = { navController.popBackStack() },
                         onRegisterSuccess = { navController.popBackStack() }
-                    )
-                }
-                composable(Screen.ForgotPassword.route) {
-                    ForgotPasswordScreen(
-                        onNavigateBack = { navController.popBackStack() },
-                        onResetSuccess = { navController.popBackStack() }
                     )
                 }
             }

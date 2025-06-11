@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.simplelibrarymanagement.domain.model.User
 
-@OptIn(ExperimentalMaterial3Api::class) // Added for ExposedDropdownMenuBox
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DialogManageUser(
     user: User?, // Null jika menambah user baru
@@ -17,7 +17,6 @@ fun DialogManageUser(
     onConfirm: (User) -> Unit
 ) {
     var name by remember { mutableStateOf(user?.name ?: "") }
-    // FIX: Changed "mutableState of" to "mutableStateOf"
     var email by remember { mutableStateOf(user?.email ?: "") }
 
     // Untuk role, kita bisa gunakan dropdown
@@ -91,7 +90,10 @@ fun DialogManageUser(
                     )
                     onConfirm(newUser)
                 },
-                enabled = isFormValid
+                enabled = isFormValid,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text("Save")
             }
