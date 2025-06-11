@@ -84,9 +84,7 @@ class ManageBookViewModel @Inject constructor(
         }
     }
 
-    // --- THIS IS THE FIX ---
-    // Change bookId from String to Int
-    fun onDeleteBook(bookId: Int) {
+    fun onDeleteBook(bookId: String) { // FIXED: Changed parameter type from Int to String
         viewModelScope.launch {
             try {
                 bookRepository.deleteBook(bookId)

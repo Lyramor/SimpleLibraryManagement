@@ -100,7 +100,7 @@ fun HomeScreen(
 private fun BookCarouselSection(
     title: String,
     books: List<Book>,
-    onBookClick: (Int) -> Unit,
+    onBookClick: (String) -> Unit, // FIXED: Changed parameter type from Int to String
     onCategoryClick: (Category) -> Unit
 ) {
     Column {
@@ -125,7 +125,7 @@ private fun BookCarouselSection(
                         imageUrl = book.imageUrl,
                         status = if (book.isAvailable) BookStatus.Available else BookStatus.Borrowed,
                         category = book.category,
-                        onClick = { onBookClick(book.id) },
+                        onClick = { onBookClick(book.id) }, // This now correctly passes a String
                         onCategoryClick = onCategoryClick,
                         modifier = Modifier.width(280.dp)
                     )

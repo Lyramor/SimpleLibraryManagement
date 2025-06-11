@@ -27,14 +27,12 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun loadProfileData() {
-        // This line causes the error if tokenManager.userId doesn't exist
         val currentUserId = tokenManager.userId
         if (currentUserId == null) {
             _uiState.value = _uiState.value.copy(errorMessage = "User not logged in.")
             return
         }
 
-        // ... The rest of the function ...
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
@@ -42,22 +40,24 @@ class ProfileViewModel @Inject constructor(
                 val allBorrows = borrowRepository.getAllBorrows()
 
                 if (user != null) {
-                    val userBorrows = allBorrows.filter { it.userId == currentUserId }
+                    // FIXED: Use safe call operator '?.id' and filter out null users
+                    val userBorrows = allBorrows.filter { it.user?.id == currentUserId }
                     val totalBorrowed = userBorrows.size
                     val currentlyBorrowed = userBorrows.count { it.returnDate == null }
                     val overdue = userBorrows.count { it.status == "OVERDUE" && it.returnDate == null }
                     val borrowedBookList = userBorrows
                         .filter { it.returnDate == null }
                         .map { borrowRecord ->
+                            // These lines are already correct from previous fixes
                             BorrowedBook(
                                 id = borrowRecord.id,
-                                bookId = borrowRecord.bookId,
-                                bookTitle = "Book ID: ${borrowRecord.bookId}",
-                                bookAuthor = "Author details needed",
-                                bookCoverUrl = null,
+                                bookId = borrowRecord.book.id,
+                                bookTitle = borrowRecord.book.title,
+                                bookAuthor = borrowRecord.book.author,
+                                bookCoverUrl = borrowRecord.book.imageUrl,
                                 borrowDate = borrowRecord.loanDate,
                                 dueDate = borrowRecord.dueDate,
-                                categoryName = "Category needed",
+                                categoryName = borrowRecord.book.category?.name,
                                 isOverdue = borrowRecord.status == "OVERDUE"
                             )
                         }
@@ -66,9 +66,9 @@ class ProfileViewModel @Inject constructor(
                         id = user.id,
                         name = user.name,
                         email = user.email,
-                        phoneNumber = "+62 812-3456-7890",
-                        address = "Jl. Contoh No. 123, Jakarta",
-                        joinDate = "15 Januari 2023",
+                        phoneNumber = "+62 812-3456-7890", // Placeholder, ideally from user object
+                        address = "Jl. Contoh No. 123, Jakarta", // Placeholder, ideally from user object
+                        joinDate = "15 Januari 2023", // Placeholder, ideally from user object
                         totalBorrowedBooks = totalBorrowed,
                         activeBorrowedBooks = currentlyBorrowed,
                         overdueBooks = overdue

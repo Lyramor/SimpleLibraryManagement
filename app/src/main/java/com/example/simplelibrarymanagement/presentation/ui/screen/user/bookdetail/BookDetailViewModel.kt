@@ -29,7 +29,7 @@ class BookDetailViewModel @Inject constructor(
         fetchBookDetails(bookId)
     }
 
-    private fun fetchBookDetails(bookId: Int) {
+    private fun fetchBookDetails(bookId: String) { // FIXED: Changed parameter type from Int to String
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
