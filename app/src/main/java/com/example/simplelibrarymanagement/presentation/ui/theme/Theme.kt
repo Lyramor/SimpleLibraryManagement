@@ -15,46 +15,46 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Primary,
     onPrimary = OnPrimary,
-    primaryContainer = PrimaryDark,
-    onPrimaryContainer = OnPrimary,
+    primaryContainer = Color(0xFF4A2C2A),
+    onPrimaryContainer = Color(0xFFFFDAD4),
 
     secondary = Secondary,
     onSecondary = OnSecondary,
-    secondaryContainer = SecondaryDark,
-    onSecondaryContainer = OnSecondary,
+    secondaryContainer = Color(0xFF3D4A52),
+    onSecondaryContainer = Color(0xFFD1E4ED),
 
     tertiary = CategoryFiction,
     onTertiary = OnPrimary,
-    tertiaryContainer = CategoryScience,
-    onTertiaryContainer = OnPrimary,
+    tertiaryContainer = Color(0xFF4A2A4A),
+    onTertiaryContainer = Color(0xFFE1BEE7),
 
     error = Error,
     onError = OnPrimary,
-    errorContainer = PrimaryDark,
-    onErrorContainer = OnPrimary,
+    errorContainer = Color(0xFF5F2120),
+    onErrorContainer = Color(0xFFFFDAD6),
 
     background = Color(0xFF121212),
-    onBackground = Color(0xFFE0E0E0),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE0E0E0),
-    surfaceVariant = Color(0xFF2C2C2C),
-    onSurfaceVariant = Color(0xFFB0B0B0),
+    onBackground = Color(0xFFE6E1E5),
+    surface = Color(0xFF1D1B20),
+    onSurface = Color(0xFFE6E1E5),
+    surfaceVariant = Color(0xFF49454F),
+    onSurfaceVariant = Color(0xFFCAC4D0),
 
-    outline = Color(0xFF404040),
-    outlineVariant = Color(0xFF2C2C2C),
+    outline = Color(0xFF79747E),
+    outlineVariant = Color(0xFF49454F),
     scrim = Color(0xFF000000),
 
-    inverseSurface = Color(0xFFE0E0E0),
-    inverseOnSurface = Color(0xFF1E1E1E),
-    inversePrimary = PrimaryDark,
+    inverseSurface = Color(0xFFE6E1E5),
+    inverseOnSurface = Color(0xFF322F35),
+    inversePrimary = Primary,
 
-    surfaceDim = Color(0xFF181818),
-    surfaceBright = Color(0xFF2C2C2C),
-    surfaceContainerLowest = Color(0xFF0F0F0F),
-    surfaceContainerLow = Color(0xFF1A1A1A),
-    surfaceContainer = Color(0xFF1E1E1E),
-    surfaceContainerHigh = Color(0xFF282828),
-    surfaceContainerHighest = Color(0xFF323232)
+    surfaceDim = Color(0xFF141218),
+    surfaceBright = Color(0xFF3B383E),
+    surfaceContainerLowest = Color(0xFF0F0D13),
+    surfaceContainerLow = Color(0xFF1D1B20),
+    surfaceContainer = Color(0xFF211F26),
+    surfaceContainerHigh = Color(0xFF2B2930),
+    surfaceContainerHighest = Color(0xFF36343B)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -71,7 +71,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = CategoryFiction,
     onTertiary = OnPrimary,
     tertiaryContainer = Color(0xFFE1BEE7),
-    onTertiaryContainer = TextPrimary,
+    onTertiaryContainer = Color(0xFF31111D),
 
     error = Error,
     onError = OnPrimary,
@@ -89,23 +89,23 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = Divider,
     scrim = Shadow,
 
-    inverseSurface = Color(0xFF313030),
-    inverseOnSurface = Color(0xFFF4F0F0),
-    inversePrimary = PrimaryLight,
+    inverseSurface = Color(0xFF322F35),
+    inverseOnSurface = Color(0xFFF4EFF4),
+    inversePrimary = Color(0xFFFFB4AB),
 
-    surfaceDim = Color(0xFFE8E0E0),
-    surfaceBright = Color(0xFFFFFBFF),
+    surfaceDim = Color(0xFFDDD8DD),
+    surfaceBright = Background,
     surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFFEF7F7),
+    surfaceContainerLow = Color(0xFFF7F2F7),
     surfaceContainer = Surface,
-    surfaceContainerHigh = Color(0xFFF3EEEE),
-    surfaceContainerHighest = Color(0xFFEDE9E9)
+    surfaceContainerHigh = Color(0xFFF1ECF1),
+    surfaceContainerHighest = Color(0xFFEBE6EB)
 )
 
 @Composable
 fun SimpleLibraryManagementTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled for consistency
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -113,7 +113,6 @@ fun SimpleLibraryManagementTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -122,8 +121,8 @@ fun SimpleLibraryManagementTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = Color.Transparent.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
@@ -135,56 +134,73 @@ fun SimpleLibraryManagementTheme(
     )
 }
 
-// Theme extensions for easier access to custom colors
+// Enhanced theme extensions
 val MaterialTheme.libraryColors: LibraryColors
     @Composable
     get() = LibraryColorsProvider.current
 
-// Theme extensions for custom shapes
 val MaterialTheme.libraryShapes: CustomShapes
     @Composable
     get() = CustomShapes
 
-// Theme extensions for custom typography
+// Typography extension
 val MaterialTheme.libraryTypography: CustomTypography
     @Composable
     get() = CustomTypography
 
-// Provider object to access custom theme colors
+// Provider object for custom colors
 object LibraryColorsProvider {
     val current: LibraryColors
         @Composable
         get() = LibraryColors(
             available = Available,
+            availableContainer = Color(0xFFD8F3D9), // Example color
             borrowed = Borrowed,
+            borrowedContainer = Color(0xFFFFECB3), // Example color
             overdue = Overdue,
+            overdueContainer = Color(0xFFFFCDD2), // Example color
             categoryFiction = CategoryFiction,
             categoryNonFiction = CategoryNonFiction,
             categoryScience = CategoryScience,
             categoryHistory = CategoryHistory,
             categoryBiography = CategoryBiography,
+            categoryTechnology = Color(0xFF2196F3), // Example color
+            categoryArt = Color(0xFF795548), // Example color
+            categoryPhilosophy = Color(0xFF607D8B), // Example color
             success = Success,
+            successContainer = Color(0xFFD8F3D9), // Example color
             warning = Warning,
+            warningContainer = Color(0xFFFFF3CD), // Example color
             info = Info,
+            infoContainer = Color(0xFFD1ECF1), // Example color
             inputBackground = InputBackground,
             inputBorder = InputBorder,
             inputFocused = InputFocused
         )
 }
 
-// Data class for custom colors
+// Enhanced data class for custom colors
 data class LibraryColors(
     val available: Color,
+    val availableContainer: Color,
     val borrowed: Color,
+    val borrowedContainer: Color,
     val overdue: Color,
+    val overdueContainer: Color,
     val categoryFiction: Color,
     val categoryNonFiction: Color,
     val categoryScience: Color,
     val categoryHistory: Color,
     val categoryBiography: Color,
+    val categoryTechnology: Color,
+    val categoryArt: Color,
+    val categoryPhilosophy: Color,
     val success: Color,
+    val successContainer: Color,
     val warning: Color,
+    val warningContainer: Color,
     val info: Color,
+    val infoContainer: Color,
     val inputBackground: Color,
     val inputBorder: Color,
     val inputFocused: Color
